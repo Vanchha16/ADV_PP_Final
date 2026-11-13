@@ -1,0 +1,27 @@
+<div class="col">
+  <article class="product-card h-100">
+    <a href="{{ url_for('public.product_detail', product_id=p.id) }}" class="product-thumb">
+      <img src="{{ p.image_src() }}" alt="{{ p.name }}" loading="lazy">
+      {% if not p.in_stock %}<span class="stock-flag">Out of stock</span>{% endif %}
+    </a>
+    <div class="product-body">
+      <h2 class="product-name"><a href="{{ url_for('public.product_detail', product_id=p.id) }}">{{ p.name }}</a></h2>
+      <p class="product-desc">{{ p.short_description }}</p>
+      <div class="product-foot">
+        <span class="price">{{ p.price|money }}</span>
+        <div class="d-flex gap-2">
+          <a href="{{ url_for('public.product_detail', product_id=p.id) }}" class="btn btn-sm btn-outline-dark" title="View details">Details</a>
+          <form method="post" action="{{ url_for('public.cart_add') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="product_id" value="{{ p.id }}">
+            <input type="hidden" name="quantity" value="1">
+            <input type="hidden" name="next" value="{{ request.full_path }}">
+            <button class="btn btn-sm btn-brand" {% if not p.in_stock %}disabled{% endif %} title="Add to cart">
+              <i class="bi bi-cart-plus"></i> Add
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </article>
+</div>

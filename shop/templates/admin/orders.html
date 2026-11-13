@@ -1,0 +1,37 @@
+{% extends "admin/base.html" %}
+{% block title %}Orders · Admin{% endblock %}
+{% block content %}
+<h1 class="page-title">Order history</h1>
+<div class="row g-3 mb-4">
+  <div class="col-sm-4"><div class="stat"><small>Paid orders</small><strong>{{ paid_count }}</strong></div></div>
+  <div class="col-sm-4"><div class="stat"><small>Revenue</small><strong>{{ revenue|money }}</strong></div></div>
+  <div class="col-sm-4"><div class="stat"><small>Awaiting payment</small><strong>{{ pending_count }}</strong></div></div>
+</div>
+<ul class="nav nav-pills mb-3">
+  {% for key, label in [("PAID", "Paid"), ("PENDING", "Awaiting payment"), ("ALL", "All")] %}
+  <li class="nav-item"><a class="nav-link {% if status == key %}active{% endif %}" href="{{ url_for('admin.orders', status=key) }}">{{ label }}</a></li>
+  {% endfor %}
+</ul>
+<div class="panel p-0">
+  <div class="table-responsive">
+    <table class="table admin-table align-middle mb-0">
+      <thead><tr><th>Order ID</th><th>Customer Name</th><th>Phone Number</th><th class="text-end">Total Amount</th><th>Order Date</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+      {% for o in orders %}
+        <tr>
+          <td class="fw-semibold">{{ o.number }}</td>
+          <td>{{ o.customer_name }}</td>
+          <td>{{ o.phone }}</td>
+          <td class="text-end">{{ o.total_amount|money(o.currency) }}</td>
+          <td>{{ o.created_at|dt }}</td>
+          <td>{% if o.is_paid %}<span class="badge rounded-pill text-bg-success">Paid</span>{% else %}<span class="badge rounded-pill text-bg-warning">Pending</span>{% endif %}</td>
+          <td class="text-end"><a class="btn btn-sm btn-outline-dark text-nowrap" href="{{ url_for('admin.order_detail', order_id=o.id) }}"><i class="bi bi-eye"></i> View details</a></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7" class="text-center text-muted py-5">No orders yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

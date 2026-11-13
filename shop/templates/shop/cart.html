@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Your cart · {{ shop_name }}{% endblock %}
+{% block content %}
+<h1 class="page-title">Shopping cart</h1>
+{% if lines %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <form method="post" action="{{ url_for('public.cart_update') }}" class="panel p-0">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="table-responsive">
+        <table class="table cart-table align-middle mb-0">
+          <thead><tr><th>Product</th><th class="text-end">Unit price</th><th style="width:130px">Quantity</th><th class="text-end">Subtotal</th><th></th></tr></thead>
+          <tbody>
+          {% for l in lines %}
+            <tr>
+              <td>
+                <div class="d-flex align-items-center gap-3">
+                  <img src="{{ l.product.image_src() }}" alt="" class="cart-thumb">
+                  <div>
+                    <a href="{{ url_for('public.product_detail', product_id=l.product.id) }}" class="fw-semibold text-reset text-decoration-none">{{ l.product.name }}</a>
+                    {% if l.over_stock %}<div class="small text-danger">Only {{ l.product.stock }} in stock</div>{% endif %}
+                  </div>
+                </div>
+              </td>
+              <td class="text-end">{{ l.product.price|money }}</td>
+              <td><input type="number" name="qty_{{ l.product.id }}" value="{{ l.quantity }}" min="0" max="{{ l.product.stock }}" class="form-control form-control-sm text-center" aria-label="Quantity for {{ l.product.name }}"></td>
+              <td class="text-end fw-semibold">{{ l.subtotal|money }}</td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-link text-danger" formaction="{{ url_for('public.cart_remove', product_id=l.product.id) }}" title="Remove {{ l.product.name }}" aria-label="Remove {{ l.product.name }}"><i class="bi bi-trash3"></i></button>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="d-flex justify-content-between p-3 border-top">
+        <a href="{{ url_for('public.index') }}" class="btn btn-link px-0"><i class="bi bi-arrow-left"></i> Continue shopping</a>
+        <button class="btn btn-outline-dark"><i class="bi bi-arrow-repeat"></i> Update cart</button>
+      </div>
+    </form>
+  </div>
+  <div class="col-lg-4">
+    <div class="panel summary">
+      <h2 class="h5 mb-3">Order summary</h2>
+      <div class="d-flex justify-content-between mb-2"><span>Items</span><span>{{ lines|sum(attribute='quantity') }}</span></div>
+      <div class="d-flex justify-content-between mb-2"><span>Shipping</span><span class="text-success">Free</span></div>
+      <hr>
+      <div class="d-flex justify-content-between total-row"><span>Total</span><span>{{ total|money }}</span></div>
+      <a href="{{ url_for('public.checkout') }}" class="btn btn-brand btn-lg w-100 mt-3">Proceed to Checkout <i class="bi bi-arrow-right"></i></a>
+      <p class="small text-muted text-center mt-2 mb-0"><span class="khqr-pill">KHQR</span> secure payment</p>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon"><i class="bi bi-cart-x"></i></div>
+  <p class="text-muted">Your cart is empty.</p>
+  <a href="{{ url_for('public.index') }}" class="btn btn-brand">Start shopping</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ "Edit" if product else "New" }} product · Admin{% endblock %}
+{% block content %}
+<a href="{{ url_for('admin.products') }}" class="btn btn-link px-0 mb-2"><i class="bi bi-arrow-left"></i> All products</a>
+<h1 class="page-title">{{ "Edit product #" ~ product.id if product else "Add new product" }}</h1>
+<form method="post" enctype="multipart/form-data" class="row g-4" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="col-lg-8">
+    <div class="panel">
+      <div class="mb-3">
+        <label for="name" class="form-label fw-semibold">Name</label>
+        <input id="name" name="name" class="form-control {% if errors.name %}is-invalid{% endif %}" value="{{ data.name or '' }}" required maxlength="120">
+        <div class="invalid-feedback">{{ errors.name }}</div>
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label fw-semibold">Description</label>
+        <textarea id="description" name="description" rows="6" class="form-control">{{ data.description or '' }}</textarea>
+      </div>
+      <div class="row">
+        <div class="col-sm-6 mb-3">
+          <label for="price" class="form-label fw-semibold">Price (USD)</label>
+          <div class="input-group has-validation">
+            <span class="input-group-text">$</span>
+            <input id="price" name="price" type="number" step="0.01" min="0.01" class="form-control {% if errors.price %}is-invalid{% endif %}" value="{{ data.price or '' }}" required>
+            <div class="invalid-feedback">{{ errors.price }}</div>
+          </div>
+        </div>
+        <div class="col-sm-6 mb-3">
+          <label for="stock" class="form-label fw-semibold">Stock Quantity</label>
+          <input id="stock" name="stock" type="number" step="1" min="0" class="form-control {% if errors.stock %}is-invalid{% endif %}" value="{{ data.stock if data.stock is not none else '' }}" required>
+          <div class="invalid-feedback">{{ errors.stock }}</div>
+        </div>
+      </div>
+      <div class="mb-1">
+        <span class="form-label fw-semibold d-block">Status</span>
+        <div class="btn-group" role="group">
+          <input type="radio" class="btn-check" name="status" id="st-active" value="active" {% if data.is_active %}checked{% endif %}>
+          <label class="btn btn-outline-success" for="st-active">Active</label>
+          <input type="radio" class="btn-check" name="status" id="st-inactive" value="inactive" {% if not data.is_active %}checked{% endif %}>
+          <label class="btn btn-outline-secondary" for="st-inactive">Inactive</label>
+        </div>
+        <div class="form-text">Inactive products are hidden from the store.</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="panel">
+      <span class="form-label fw-semibold d-block">Image</span>
+      <div class="image-preview mb-3"><img id="preview" src="{{ product.image_src() if product else url_for('static', filename='img/placeholder.svg') }}" alt="Preview"></div>
+      <input id="image" name="image" type="file" accept="image/png,image/jpeg,image/webp,image/gif" class="form-control {% if errors.image %}is-invalid{% endif %}">
+      <div class="invalid-feedback">{{ errors.image }}</div>
+      <div class="form-text mb-3">PNG, JPG, WEBP or GIF, up to 5 MB.</div>
+      {% if product and product.image_data %}
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" name="remove_image" id="remove_image" value="1">
+        <label class="form-check-label" for="remove_image">Remove uploaded image</label>
+      </div>
+      {% endif %}
+      <label for="image_url" class="form-label small text-muted">…or use an image URL</label>
+      <input id="image_url" name="image_url" type="url" class="form-control form-control-sm {% if errors.image_url %}is-invalid{% endif %}" value="{{ data.image_url or '' }}" placeholder="https://…">
+      <div class="invalid-feedback">{{ errors.image_url }}</div>
+    </div>
+    <button class="btn btn-brand btn-lg w-100 mt-3"><i class="bi bi-check2"></i> {{ "Update product" if product else "Save product" }}</button>
+  </div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('image').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (f) document.getElementById('preview').src = URL.createObjectURL(f);
+});
+</script>
+{% endblock %}

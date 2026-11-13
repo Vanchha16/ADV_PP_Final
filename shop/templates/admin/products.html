@@ -1,0 +1,36 @@
+{% extends "admin/base.html" %}
+{% block title %}Products · Admin{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <div><h1 class="page-title mb-0">Products</h1><small class="text-muted">{{ products|length }} total</small></div>
+  <a href="{{ url_for('admin.product_new') }}" class="btn btn-brand"><i class="bi bi-plus-lg"></i> Add New Product</a>
+</div>
+<div class="panel p-0">
+  <div class="table-responsive">
+    <table class="table admin-table align-middle mb-0">
+      <thead><tr><th>ID</th><th>Product</th><th class="text-end">Price</th><th class="text-end">Stock</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+      <tbody>
+      {% for p in products %}
+        <tr>
+          <td class="text-muted">{{ p.id }}</td>
+          <td><div class="d-flex align-items-center gap-2"><img src="{{ p.image_src() }}" class="cart-thumb sm" alt=""><span class="fw-semibold">{{ p.name }}</span></div></td>
+          <td class="text-end">{{ p.price|money }}</td>
+          <td class="text-end {% if p.stock == 0 %}text-danger fw-semibold{% elif p.stock < 5 %}text-warning-emphasis{% endif %}">{{ p.stock }}</td>
+          <td>{% if p.is_active %}<span class="badge rounded-pill text-bg-success">Active</span>{% else %}<span class="badge rounded-pill text-bg-secondary">Inactive</span>{% endif %}</td>
+          <td class="text-end text-nowrap">
+            <a href="{{ url_for('admin.product_edit', product_id=p.id) }}" class="btn btn-sm btn-outline-dark"><i class="bi bi-pencil"></i> Edit</a>
+            <form method="post" action="{{ url_for('admin.product_delete', product_id=p.id) }}" class="d-inline"
+                  data-confirm="Delete “{{ p.name }}”? This cannot be undone." onsubmit="return confirm(this.dataset.confirm);">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash3"></i> Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="6" class="text-center text-muted py-5">No products yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

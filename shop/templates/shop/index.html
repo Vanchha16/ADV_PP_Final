@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+{% if not q %}
+<section class="hero mb-5">
+  <div class="hero-text">
+    <span class="eyebrow">New arrivals every week</span>
+    <h1>Level up your<br>anime collection.</h1>
+    <p>Figures, plushies, manga box sets, hoodies and more for every otaku. Pay in seconds by scanning a KHQR code with any Cambodian banking app.</p>
+    <a href="#products" class="btn btn-light btn-lg fw-semibold">Shop now <i class="bi bi-arrow-down"></i></a>
+  </div>
+  <div class="hero-badges">
+    <div><i class="bi bi-qr-code-scan"></i><span>KHQR payment</span></div>
+    <div><i class="bi bi-truck"></i><span>Nationwide shipping</span></div>
+    <div><i class="bi bi-heart"></i><span>Made for fans</span></div>
+  </div>
+</section>
+{% endif %}
+
+<div id="products" class="d-flex justify-content-between align-items-end mb-3">
+  <div>
+    <h2 class="section-title mb-0">{% if q %}Results for “{{ q }}”{% else %}All products{% endif %}</h2>
+    <small class="text-muted">{{ products|length }} item{{ '' if products|length == 1 else 's' }}</small>
+  </div>
+  {% if q %}<a href="{{ url_for('public.index') }}" class="btn btn-sm btn-link">Clear search</a>{% endif %}
+</div>
+
+{% if products %}
+<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+  {% for p in products %}{% include "shop/_product_card.html" %}{% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon"><i class="bi bi-search"></i></div>
+  <p class="text-muted">No products found.</p>
+</div>
+{% endif %}
+{% endblock %}

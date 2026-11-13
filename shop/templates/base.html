@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ shop_name }}{% endblock %}</title>
+  {% block meta %}<meta name="description" content="{{ shop_name }} — anime figures, plush, manga and merch, paid with KHQR.">{% endblock %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='vendor/bootstrap-icons/bootstrap-icons.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+{% block navbar %}
+<nav class="navbar navbar-expand-md site-nav sticky-top">
+  <div class="container">
+    <a class="navbar-brand brand" href="{{ url_for('public.index') }}">
+      <span class="brand-mark"><i class="bi bi-stars"></i></span>{{ shop_name }}
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="nav">
+      <form class="d-flex ms-md-4 my-2 my-md-0 flex-grow-1 search" action="{{ url_for('public.index') }}" role="search">
+        <i class="bi bi-search"></i>
+        <input class="form-control" type="search" name="q" placeholder="Search products…" value="{{ q or '' }}" aria-label="Search">
+      </form>
+      <ul class="navbar-nav ms-auto align-items-md-center gap-md-2">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('public.index') }}">Shop</a></li>
+        <li class="nav-item">
+          <a class="nav-link cart-link" href="{{ url_for('public.view_cart') }}">
+            <i class="bi bi-cart3"></i> Cart
+            {% if cart_count %}<span class="badge rounded-pill cart-badge">{{ cart_count }}</span>{% endif %}
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+{% endblock %}
+
+<main class="{% block main_class %}py-4 py-md-5{% endblock %}">
+  <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+</main>
+
+{% block footer %}
+<footer class="site-footer">
+  <div class="container d-flex flex-column flex-md-row justify-content-between gap-2">
+    <span>© {{ current_year }} {{ shop_name }}. Anime merch shipped across Cambodia 🇰🇭</span>
+    <span class="d-flex align-items-center gap-2">We accept <span class="khqr-pill">KHQR</span> via Bakong &amp; all Cambodian banks</span>
+  </div>
+</footer>
+{% endblock %}
+<script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

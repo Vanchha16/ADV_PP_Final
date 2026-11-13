@@ -1,0 +1,13 @@
+<div class="panel summary">
+  <h2 class="h5 mb-3">{{ summary_title or "Your order" }}</h2>
+  <ul class="list-unstyled mb-0 summary-items">
+    {% for l in items %}
+    <li class="d-flex justify-content-between gap-3">
+      <span>{{ l.name }} <span class="text-muted">× {{ l.quantity }}</span></span>
+      <span>{{ l.subtotal|money }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  <hr>
+  <div class="d-flex justify-content-between total-row"><span>Total</span><span>{{ total|money }}</span></div>
+</div>
