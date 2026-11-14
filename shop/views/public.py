@@ -1,9 +1,10 @@
 import re
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 
 from flask import (Blueprint, Response, abort, current_app, flash, jsonify,
                    redirect, render_template, request, session, url_for)
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 
 from .. import cart, payments
 from ..extensions import db
@@ -37,15 +38,61 @@ def _safe_next(default):
 
 # ---------------------------------------------------------------- catalogue
 
+SORTS = {
+    "new": ("Newest", (Product.created_at.desc(), Product.id.desc())),
+    "price_asc": ("Price: low to high", (Product.price.asc(), Product.id.desc())),
+    "price_desc": ("Price: high to low", (Product.price.desc(), Product.id.desc())),
+    "name": ("Name: A to Z", (Product.name.asc(),)),
+}
+
+
+def _money_arg(name):
+    try:
+        value = Decimal(request.args.get(name, "").strip())
+        return value if value >= 0 else None
+    except (InvalidOperation, ValueError):
+        return None
+
+
 @bp.get("/")
 def index():
     q = request.args.get("q", "").strip()
-    stmt = db.select(Product).where(Product.is_active.is_(True))
+    category = request.args.get("category", "").strip()
+    in_stock_only = request.args.get("in_stock") == "1"
+    min_price, max_price = _money_arg("min"), _money_arg("max")
+    sort = request.args.get("sort", "new")
+    if sort not in SORTS:
+        sort = "new"
+
+    active = Product.is_active.is_(True)
+    counts = dict(db.session.execute(
+        db.select(Product.category, func.count(Product.id))
+        .where(active, Product.category.is_not(None))
+        .group_by(Product.category).order_by(Product.category)).all())
+    total_active = db.session.scalar(db.select(func.count(Product.id)).where(active))
+    if category not in counts:
+        category = ""
+
+    stmt = db.select(Product).where(active)
+    if category:
+        stmt = stmt.where(Product.category == category)
     if q:
         like = f"%{q}%"
-        stmt = stmt.where(or_(Product.name.ilike(like), Product.description.ilike(like)))
-    products = db.session.scalars(stmt.order_by(Product.created_at.desc(), Product.id.desc())).all()
-    return render_template("shop/index.html", products=products, q=q)
+        stmt = stmt.where(or_(Product.name.ilike(like), Product.description.ilike(like),
+                              Product.category.ilike(like)))
+    if in_stock_only:
+        stmt = stmt.where(Product.stock > 0)
+    if min_price is not None:
+        stmt = stmt.where(Product.price >= min_price)
+    if max_price is not None:
+        stmt = stmt.where(Product.price <= max_price)
+    products = db.session.scalars(stmt.order_by(*SORTS[sort][1])).all()
+
+    filtered = bool(q or category or in_stock_only or min_price is not None or max_price is not None)
+    return render_template("shop/index.html", products=products, q=q, category=category,
+                           categories=counts, total_active=total_active, in_stock_only=in_stock_only,
+                           min_price=min_price, max_price=max_price, sort=sort, sorts=SORTS,
+                           filtered=filtered)
 
 
 @bp.get("/product/<int:product_id>")

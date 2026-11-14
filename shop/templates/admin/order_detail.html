@@ -1,44 +1,51 @@
 {% extends "admin/base.html" %}
 {% block title %}Order {{ order.number }} · Admin{% endblock %}
+{% block section %}Order {{ order.number }}{% endblock %}
 {% block content %}
-<a href="{{ url_for('admin.orders') }}" class="btn btn-link px-0 mb-2"><i class="bi bi-arrow-left"></i> All orders</a>
-<div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
-  <h1 class="page-title mb-0">Order {{ order.number }}</h1>
-  {% if order.is_paid %}<span class="badge rounded-pill text-bg-success fs-6">Paid</span>{% else %}<span class="badge rounded-pill text-bg-warning fs-6">Awaiting payment</span>{% endif %}
-</div>
-<div class="row g-4">
-  <div class="col-lg-8">
-    <div class="panel p-0">
-      <div class="table-responsive">
-        <table class="table admin-table align-middle mb-0">
-          <thead><tr><th>Product</th><th class="text-end">Unit price</th><th class="text-end">Qty</th><th class="text-end">Subtotal</th></tr></thead>
-          <tbody>
-          {% for i in order.items %}
-            <tr>
-              <td>{{ i.product_name }}{% if not i.product_id %} <small class="text-muted">(deleted)</small>{% endif %}</td>
-              <td class="text-end">{{ i.unit_price|money(order.currency) }}</td>
-              <td class="text-end">{{ i.quantity }}</td>
-              <td class="text-end fw-semibold">{{ i.subtotal|money(order.currency) }}</td>
-            </tr>
-          {% endfor %}
-          </tbody>
-          <tfoot><tr><th colspan="3" class="text-end">Total</th><th class="text-end fs-5">{{ order.total_amount|money(order.currency) }}</th></tr></tfoot>
-        </table>
-      </div>
-    </div>
+<div class="page-head rise">
+  <a href="{{ url_for('admin.orders') }}" class="round-btn" aria-label="Back to orders">{{ icon("arrow_back") }}</a>
+  <div class="titles">
+    <h1 class="d-flex align-items-center gap-2 flex-wrap">Order {{ order.number }}
+      {% if order.is_paid %}<span class="chip green">Paid</span>{% else %}<span class="chip amber">Awaiting KHQR payment</span>{% endif %}</h1>
+    <div class="sub">Placed {{ order.created_at|dt }}</div>
   </div>
-  <div class="col-lg-4">
-    <div class="panel mb-4">
-      <h2 class="h6 text-uppercase text-muted">Customer</h2>
+</div>
+<div class="dash-grid">
+  <section class="card-x" style="padding: 8px" data-reveal>
+    <div class="table-responsive">
+      <table class="data">
+        <thead><tr><th>Product</th><th class="text-end">Unit price</th><th class="text-end">Qty</th><th class="text-end">Subtotal</th></tr></thead>
+        <tbody>
+        {% for i in order.items %}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-3">
+                {% if i.product %}<img class="photo" src="{{ i.product.image_src() }}" alt="">{% else %}<span class="photo d-grid" style="place-items:center">{{ icon("toys", "ms-sm") }}</span>{% endif %}
+                <span class="fw-semibold">{{ i.product_name }}{% if not i.product_id %} <small class="text-muted fw-normal">(deleted)</small>{% endif %}</span>
+              </div>
+            </td>
+            <td class="text-end">{{ i.unit_price|money(order.currency) }}</td>
+            <td class="text-end">{{ i.quantity }}</td>
+            <td class="text-end fw-bold">{{ i.subtotal|money(order.currency) }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot><tr><th colspan="3" class="text-end">Total</th><th class="text-end">{{ order.total_amount|money(order.currency) }}</th></tr></tfoot>
+      </table>
+    </div>
+  </section>
+  <div class="dash-col">
+    <section class="card-x card-pad" data-reveal data-reveal-index="1">
+      <h2 class="sec-title">{{ icon("person") }} Customer</h2>
       <dl class="detail-list mb-0">
         <dt>Name</dt><dd>{{ order.customer_name }}</dd>
         <dt>Email</dt><dd><a href="mailto:{{ order.email }}">{{ order.email }}</a></dd>
         <dt>Phone</dt><dd><a href="tel:{{ order.phone }}">{{ order.phone }}</a></dd>
         <dt>Shipping address</dt><dd class="pre-line">{{ order.shipping_address }}</dd>
       </dl>
-    </div>
-    <div class="panel">
-      <h2 class="h6 text-uppercase text-muted">Payment (KHQR)</h2>
+    </section>
+    <section class="card-x card-pad" data-reveal data-reveal-index="2">
+      <h2 class="sec-title">{{ icon("qr_code_2") }} KHQR payment</h2>
       <dl class="detail-list mb-0">
         <dt>Order date</dt><dd>{{ order.created_at|dt }}</dd>
         <dt>Paid at</dt><dd>{{ order.paid_at|dt }}</dd>
@@ -47,7 +54,7 @@
         {% if order.payment_hash %}<dt>Transaction hash</dt><dd><code class="small text-break">{{ order.payment_hash }}</code></dd>{% endif %}
         {% if order.payment_from %}<dt>Paid from</dt><dd>{{ order.payment_from }}</dd>{% endif %}
       </dl>
-    </div>
+    </section>
   </div>
 </div>
 {% endblock %}

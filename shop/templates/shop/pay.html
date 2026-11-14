@@ -1,52 +1,52 @@
 {% extends "base.html" %}
 {% block title %}Pay with KHQR · {{ shop_name }}{% endblock %}
 {% block content %}
-<ol class="steps mb-4"><li class="done">Cart</li><li class="done">Details</li><li class="active">Pay with KHQR</li><li>Done</li></ol>
+<ol class="steps"><li class="done">Cart</li><li class="done">Details</li><li class="active">Pay with KHQR</li><li>Done</li></ol>
 <div class="row g-4 justify-content-center">
-  <div class="col-md-7 col-lg-5">
-    <div class="khqr-card mx-auto" id="khqr-card">
+  <div class="col-md-7 col-lg-5 rise">
+    <div class="khqr-card" id="khqr-card">
       <div class="khqr-head">KHQR</div>
       <div class="khqr-merchant">
-        <div class="small text-muted">{{ config.BAKONG_MERCHANT_NAME }}</div>
+        <small>{{ config.BAKONG_MERCHANT_NAME }}</small>
         <div class="khqr-amount">{{ order.total_amount|money(order.currency) }} <span>{{ order.currency }}</span></div>
       </div>
       <div class="khqr-qr">
         <img src="{{ qr_image }}" alt="KHQR payment code for order {{ order.number }}">
         <div class="khqr-overlay" id="qr-expired" {% if not order.qr_expired %}hidden{% endif %}>
-          <p class="fw-semibold mb-2">QR code expired</p>
+          <p class="fw-bold mb-2">QR code expired</p>
           <form method="post" action="{{ url_for('public.regenerate_qr', public_id=order.public_id) }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="btn btn-brand btn-sm"><i class="bi bi-arrow-clockwise"></i> Generate new QR</button>
+            <button class="btn btn-brand btn-sm">{{ icon("refresh", "ms-sm") }} Generate new QR</button>
           </form>
         </div>
       </div>
     </div>
     <div class="text-center mt-3">
-      <div id="pay-status" class="pay-status"><span class="spinner-grow spinner-grow-sm"></span> Waiting for payment…</div>
-      <div class="text-muted small mt-1" id="countdown-wrap">Code expires in <strong id="countdown">--:--</strong></div>
+      <div id="pay-status" class="pay-status"><span class="spinner-grow spinner-grow-sm" aria-hidden="true"></span> Waiting for payment…</div>
+      <div class="text-muted small mt-2" id="countdown-wrap">Code expires in <strong class="countdown" id="countdown">--:--</strong></div>
     </div>
     {% if demo_mode %}
-    <div class="alert alert-warning mt-4 small">
-      <strong><i class="bi bi-cone-striped"></i> Demo mode.</strong> No Bakong token is configured, so payments can't be verified automatically.
+    <div class="demo-box mt-4">
+      <strong>Demo mode.</strong> No Bakong token is set, so this shop can't confirm a real payment. Use the button below to finish the order.
       <form method="post" action="{{ url_for('public.simulate_payment', public_id=order.public_id) }}" class="mt-2">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button class="btn btn-sm btn-dark">Simulate successful payment</button>
+        <button class="btn btn-success btn-sm">{{ icon("bolt", "ms-sm") }} Simulate successful payment</button>
       </form>
     </div>
     {% endif %}
   </div>
-  <div class="col-lg-5">
-    <div class="panel mb-4">
-      <h2 class="h5">How to pay</h2>
-      <ol class="how-to mb-0">
-        <li>Open your banking app (ABA, ACLEDA, Wing, Bakong…)</li>
-        <li>Tap <strong>Scan</strong> / <strong>KHQR</strong> and scan the code</li>
-        <li>Confirm the amount <strong>{{ order.total_amount|money(order.currency) }}</strong> and pay</li>
-        <li>This page updates automatically when payment is received</li>
+  <div class="col-lg-5 rise" style="--d: 80ms">
+    <div class="card-x card-pad mb-4">
+      <h2 class="sec-title">{{ icon("qr_code_scanner") }} How to pay</h2>
+      <ol class="how-to">
+        <li>Open your banking app: ABA, ACLEDA, Wing or Bakong</li>
+        <li>Tap Scan or KHQR and scan the code</li>
+        <li>Check the amount is {{ order.total_amount|money(order.currency) }} and pay</li>
+        <li>This page updates by itself when the payment arrives</li>
       </ol>
     </div>
     {% set items = [] %}
-    {% for i in order.items %}{% set _ = items.append({"name": i.product_name, "quantity": i.quantity, "subtotal": i.subtotal}) %}{% endfor %}
+    {% for i in order.items %}{% set _ = items.append({"name": i.product_name, "quantity": i.quantity, "subtotal": i.subtotal, "image": i.product.image_src() if i.product else None}) %}{% endfor %}
     {% set total = order.total_amount %}{% set summary_title = "Order " ~ order.number %}
     {% include "shop/_summary.html" %}
   </div>
@@ -67,21 +67,19 @@
     secondsLeft--;
   };
   tick(); setInterval(tick, 1000);
-
   let polls = 0;
   const poll = async () => {
     try {
       const r = await fetch(statusUrl, {headers: {'Accept': 'application/json'}});
       const d = await r.json();
       if (d.status === 'PAID') {
-        statusEl.innerHTML = '<i class="bi bi-check-circle-fill"></i> Payment received! Redirecting…';
+        statusEl.innerHTML = '<span class="ms">check_circle</span> Payment received. Opening your receipt…';
         statusEl.classList.add('paid');
         setTimeout(() => location.href = d.redirect, 900);
         return;
       }
       secondsLeft = d.seconds_left;
     } catch (e) { /* network hiccup: keep polling */ }
-    // Keep checking a little after expiry in case the customer paid at the last second.
     if (secondsLeft > -60 && ++polls < 400) setTimeout(poll, 4000);
   };
   setTimeout(poll, 3000);

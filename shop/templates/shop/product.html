@@ -4,78 +4,61 @@
 <meta name="description" content="{{ product.short_description }}">
 <meta property="og:type" content="product">
 <meta property="og:site_name" content="{{ shop_name }}">
-<meta property="og:title" content="{{ product.name }} — {{ product.price|money }}">
+<meta property="og:title" content="{{ product.name }} ({{ product.price|money }})">
 <meta property="og:description" content="{{ product.short_description }}">
 <meta property="og:url" content="{{ share_url }}">
 <meta property="og:image" content="{{ product.image_src(external=True) }}">
 <meta name="twitter:card" content="summary_large_image">
 {% endblock %}
 {% block content %}
-<nav aria-label="breadcrumb" class="mb-3">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{{ url_for('public.index') }}">Shop</a></li>
-    <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
-  </ol>
+<nav class="crumbs" aria-label="Breadcrumb">
+  <a href="{{ url_for('public.index') }}">Shop</a>{{ icon("chevron_right", "ms-sm") }}
+  {% if product.category %}<a href="{{ url_for('public.index', category=product.category) }}#products">{{ product.category }}</a>{{ icon("chevron_right", "ms-sm") }}{% endif %}
+  <span aria-current="page">{{ product.name }}</span>
 </nav>
 <div class="row g-4 g-lg-5">
-  <div class="col-md-6">
-    <div class="detail-image"><img src="{{ product.image_src() }}" alt="{{ product.name }}"></div>
+  <div class="col-md-6 rise">
+    <div class="gallery"><img src="{{ product.image_src() }}" alt="{{ product.name }}"></div>
   </div>
-  <div class="col-md-6">
+  <div class="col-md-6 rise" style="--d: 80ms">
+    <div class="d-flex flex-wrap gap-2">
+      {% if product.category %}<span class="chip">{{ icon("category", "ms-sm") }} {{ product.category }}</span>{% endif %}
+      <span class="chip green">{{ icon("verified", "ms-sm") }} Official merchandise</span>
+    </div>
     <h1 class="detail-title">{{ product.name }}</h1>
-    <div class="d-flex align-items-center gap-3 mb-3">
+    <div class="d-flex align-items-center flex-wrap gap-3 mb-3">
       <span class="detail-price">{{ product.price|money }}</span>
       {% if product.in_stock %}
-        <span class="badge text-bg-success-subtle text-success-emphasis stock-badge"><i class="bi bi-check-circle"></i> In stock · {{ product.stock }} available</span>
+        <span class="chip {{ 'amber' if product.stock <= 3 else 'green' }}">{{ icon("inventory_2", "ms-sm") }} In stock, {{ product.stock }} left</span>
       {% else %}
-        <span class="badge text-bg-danger-subtle text-danger-emphasis stock-badge"><i class="bi bi-x-circle"></i> Out of stock</span>
+        <span class="chip red">{{ icon("block", "ms-sm") }} Out of stock</span>
       {% endif %}
     </div>
     <p class="detail-desc">{{ product.description }}</p>
 
-    <form method="post" action="{{ url_for('public.cart_add') }}" class="buy-box">
+    <form method="post" action="{{ url_for('public.cart_add') }}" class="buy-bar">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input type="hidden" name="product_id" value="{{ product.id }}">
       <input type="hidden" name="next" value="{{ url_for('public.product_detail', product_id=product.id) }}">
-      <label for="qty" class="form-label fw-semibold">Quantity</label>
-      <div class="d-flex gap-3 flex-wrap">
-        <div class="input-group qty-group">
-          <button class="btn btn-outline-secondary" type="button" data-step="-1" aria-label="Decrease">−</button>
-          <input id="qty" name="quantity" type="number" class="form-control text-center" value="1" min="1" max="{{ max_qty or 1 }}" {% if not max_qty %}disabled{% endif %}>
-          <button class="btn btn-outline-secondary" type="button" data-step="1" aria-label="Increase">+</button>
-        </div>
-        <button class="btn btn-brand btn-lg flex-grow-1" {% if not max_qty %}disabled{% endif %}>
-          <i class="bi bi-cart-plus"></i> Add to Cart
-        </button>
+      <div class="stepper" role="group" aria-label="Quantity">
+        <button type="button" data-step="-1" aria-label="Decrease quantity">{{ icon("remove") }}</button>
+        <input id="qty" name="quantity" type="number" value="1" min="1" max="{{ max_qty or 1 }}" aria-label="Quantity" {% if not max_qty %}disabled{% endif %}>
+        <button type="button" data-step="1" aria-label="Increase quantity">{{ icon("add") }}</button>
       </div>
-      {% if in_cart %}<small class="text-muted d-block mt-2">You already have {{ in_cart }} in your cart.</small>{% endif %}
+      <button class="btn btn-brand" {% if not max_qty %}disabled{% endif %}>{{ icon("add_shopping_cart") }} Add to Cart</button>
+      {% if in_cart %}<small class="text-muted w-100">{{ in_cart }} already in your cart.</small>{% endif %}
     </form>
 
-    <div class="share-box">
-      <span class="fw-semibold me-2">Share:</span>
-      <a class="btn btn-share btn-facebook" target="_blank" rel="noopener"
-         href="https://www.facebook.com/sharer/sharer.php?u={{ share_url|urlencode }}">
-        <i class="bi bi-facebook"></i> Facebook</a>
-      <a class="btn btn-share btn-telegram" target="_blank" rel="noopener"
-         href="https://t.me/share/url?url={{ share_url|urlencode }}&text={{ (product.name ~ ' — ' ~ product.price|money ~ ' at ' ~ shop_name)|urlencode }}">
-        <i class="bi bi-telegram"></i> Telegram</a>
-      <button type="button" class="btn btn-share btn-copy" data-url="{{ share_url }}"><i class="bi bi-link-45deg"></i> Copy link</button>
+    <div class="card-x card-pad">
+      <div class="fw-bold mb-2">Share this product</div>
+      <div class="share-row">
+        <a class="share-btn fb" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u={{ share_url|urlencode }}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 22v-8h2.7l.4-3.2h-3.1V8.8c0-.9.3-1.6 1.6-1.6h1.7V4.4c-.3 0-1.3-.1-2.5-.1-2.5 0-4.1 1.5-4.1 4.2v2.3H7.4V14h2.8v8h3.3z"/></svg> Facebook</a>
+        <a class="share-btn tg" target="_blank" rel="noopener" href="https://t.me/share/url?url={{ share_url|urlencode }}&text={{ (product.name ~ ', ' ~ product.price|money ~ ' at ' ~ shop_name)|urlencode }}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.9 4.6 18.8 19c-.2 1-.8 1.3-1.7.8l-4.6-3.4-2.2 2.1c-.2.2-.5.5-1 .5l.3-4.7 8.6-7.8c.4-.3-.1-.5-.6-.2L6.9 13 2.4 11.6c-1-.3-1-1 .2-1.5l17.7-6.8c.8-.3 1.6.2 1.6 1.3z"/></svg> Telegram</a>
+        <button type="button" class="share-btn copy" data-copy="{{ share_url }}">{{ icon("link", "ms-sm") }} <span>Copy link</span></button>
+      </div>
     </div>
   </div>
 </div>
-{% endblock %}
-{% block scripts %}
-<script>
-document.querySelectorAll('[data-step]').forEach(btn => btn.addEventListener('click', () => {
-  const input = document.getElementById('qty');
-  if (input.disabled) return;
-  const v = (parseInt(input.value) || 1) + parseInt(btn.dataset.step);
-  input.value = Math.min(Math.max(v, 1), parseInt(input.max));
-}));
-document.querySelector('.btn-copy').addEventListener('click', async e => {
-  const btn = e.currentTarget;
-  try { await navigator.clipboard.writeText(btn.dataset.url); btn.innerHTML = '<i class="bi bi-check2"></i> Copied'; }
-  catch { prompt('Copy this link:', btn.dataset.url); }
-});
-</script>
 {% endblock %}

@@ -13,7 +13,7 @@ Admins manage products and view order history.
 ### Customer (guest) pages
 | Page | URL | What it does |
 |---|---|---|
-| Home | `/` | Product grid with name, price, description, thumbnail; **View Details** and **Add to Cart**; search box |
+| Home | `/` | Product grid with name, price, description, thumbnail; **View Details** and **Add to Cart**; search box and category filter (Figures, Plush, Manga) |
 | Product detail | `/product/<id>` | Full description, price, stock status, image; quantity selector + **Add to Cart**; **Share to Facebook / Telegram** (plus copy link; Open Graph tags give a rich preview) |
 | Cart | `/cart` | Items with quantity, unit price, subtotal and total; update quantities or remove items; **Proceed to Checkout** |
 | Checkout | `/checkout` | Guest form: Full Name, Email, Phone, Shipping Address (validated) |
@@ -34,8 +34,8 @@ Screenshots: [product](docs/screenshots/product.png) · [cart](docs/screenshots/
 - **Flask 3** (app factory + blueprints), **Flask‑SQLAlchemy** (SQLite locally, PostgreSQL in production)
 - **bakong-khqr** to build the EMVCo KHQR string, **qrcode** to render it, **Bakong Open API** (`check_transaction_by_md5`) to confirm payment
 - **Pillow** to validate and resize uploaded images (stored in the DB so they survive redeploys)
-- **Bootstrap 5** + Bootstrap Icons (bundled in `static/vendor`, no CDN needed)
-- **pytest** test suite (14 tests)
+- **UI:** same design as our MA project (Anime World mobile app + web admin): sky-blue brand, Roboto, Material Symbols Rounded icons, light / dark / system theme, logo and promo banners from the app. Bootstrap 5 grid (bundled in `static/vendor`).
+- **pytest** test suite (21 tests)
 
 ## Project structure
 ```
@@ -49,11 +49,13 @@ anime-world-shop/
 │   ├── payments.py         # KHQR generation, Bakong status check, settle order
 │   ├── images.py           # upload validation / resize
 │   ├── security.py         # CSRF + admin login guard
-│   ├── seed.py             # sample products with generated images
+│   ├── seed.py             # first-start catalogue + fallback images
+│   ├── importer.py         # import-products command (JSON / CSV)
 │   ├── views/public.py     # customer pages
 │   ├── views/admin.py      # admin pages
 │   ├── templates/          # Jinja2 templates (shop/, admin/, errors/)
-│   └── static/             # css, placeholder image, vendored Bootstrap
+│   └── static/             # css, js/motion.js (theme, slider, motion), logo + banners, vendored Bootstrap
+├── data/products.json      # researched product catalogue (prices, photos, sources)
 ├── tests/                  # pytest
 ├── bakong_proxy/proxy.py   # optional relay for servers outside Cambodia
 ├── requirements.txt, Procfile, render.yaml, .env.example
@@ -77,7 +79,7 @@ flask --app wsgi run --debug
 ```
 Open http://127.0.0.1:5000. Admin: http://127.0.0.1:5000/admin (default `admin` / `admin123`, **change it**).
 
-The first start creates the database and loads 9 sample products. To reset:
+The first start creates the database and loads the 18 products in `data/products.json`, downloading their photos. To reset:
 ```bash
 flask --app wsgi seed --reset
 ```
@@ -85,6 +87,20 @@ Run tests:
 ```bash
 pip install pytest && python -m pytest -q
 ```
+
+## Product catalogue and import script
+`data/products.json` holds 18 real anime products researched online in November 2026: Good Smile Nendoroids and POP UP PARADE figures, a Funko Pop!, Good Smile plushies and VIZ manga box sets. Each entry keeps its `source` link. Prices are the maker or retailer price at that source, with yen converted at about ¥150 = $1. Stock numbers are demo values.
+
+Import or update products (matched by name) from JSON or CSV:
+```bash
+flask --app wsgi import-products data/products.json            # add new, update existing
+flask --app wsgi import-products data/products.json --replace  # start the catalogue over (order history is kept)
+flask --app wsgi import-products my-items.csv --no-download-images
+```
+Fields: `name`, `price` (required), `stock`, `category`, `description`, `active`, `image_url`, `crop` (`left` / `center` / `right` to square a wide photo), `character`, `source`.
+Photos from `image_url` are downloaded, resized and stored in the database. If a download fails, the product gets a generated placeholder instead.
+
+> Product photos belong to their makers and publishers (Good Smile Company, Funko, VIZ Media; book covers via Open Library). They are used here for a non-commercial school project; replace them with your own photos before any real sale.
 
 ## KHQR payment: how it works
 1. At checkout the order is saved as **PENDING** together with its customer details and line items.

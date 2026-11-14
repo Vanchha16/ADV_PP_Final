@@ -1,0 +1,135 @@
+{% extends "admin/base.html" %}
+{% block title %}Dashboard · Admin{% endblock %}
+{% block section %}Dashboard{% endblock %}
+{% block content %}
+{% set hour = (now.hour + 7) % 24 %}{# Phnom Penh is UTC+7 #}
+{% set greeting = "Good morning" if hour < 12 else ("Good afternoon" if hour < 18 else "Good evening") %}
+<div class="page-head rise">
+  <div class="titles">
+    <h1>{{ greeting }}, {{ config.ADMIN_USERNAME|capitalize }}</h1>
+    <div class="sub">{{ now.strftime("%A, %d %B %Y") }}. Here is how the shop is doing.</div>
+  </div>
+  <form class="search-box" action="{{ url_for('admin.orders') }}" role="search">
+    {{ icon("search") }}<input name="q" placeholder="Find an order or customer" aria-label="Find an order or customer" maxlength="100">
+  </form>
+  <a class="btn btn-brand" href="{{ url_for('admin.product_new') }}">{{ icon("add", "ms-sm") }} Add product</a>
+</div>
+
+<div class="kpis">
+  {% set kpis = [
+    ("payments", "green", revenue, "$", 2, "Revenue (paid)", ("+" ~ (today_revenue|money) ~ " today") if today_revenue else ""),
+    ("receipt_long", "amber", pending_count, "", 0, "Orders awaiting payment", ""),
+    ("inventory_2", "red", low_count, "", 0, "Low stock (3 or less)", ""),
+    ("storefront", "cyan", active_count, "", 0, "Products in the shop", ""),
+  ] %}
+  {% for ico, tint, value, prefix, decimals, label, sub in kpis %}
+  <div class="card-x kpi" data-reveal data-reveal-index="{{ loop.index0 }}">
+    <div class="kpi-icon {{ tint }}">{{ icon(ico) }}</div>
+    <div class="min-w-0">
+      <div class="kpi-value" data-count="{{ value }}" data-prefix="{{ prefix }}" data-decimals="{{ decimals }}">{{ prefix }}{{ "{:,.{}f}".format(value|float, decimals) }}</div>
+      <div class="kpi-label">{{ label }}</div>
+      {% if sub %}<div class="kpi-sub">{{ sub }}</div>{% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="dash-grid">
+  <div class="dash-col">
+    <section class="card-x card-pad" data-reveal>
+      <div class="d-flex align-items-center">
+        <div class="flex-grow-1">
+          <h2 class="card-title">Revenue, last 7 days</h2>
+          <div class="card-sub">{{ week_total|money }} this week</div>
+        </div>
+        <span class="chip">7 days</span>
+      </div>
+      <div class="chart" role="img" aria-label="Revenue per day for the last 7 days">
+        {% for d in week %}
+        <div class="chart-col {% if loop.last %}today{% endif %}" title="{{ d.date }}: {{ d.total|money }}">
+          <div class="chart-bar-wrap">
+            <span class="chart-val">${{ "%.0f"|format(d.total) }}</span>
+            <div class="chart-bar" style="--h: {{ [d.pct, 3]|max }}%; --i: {{ loop.index0 }}"></div>
+          </div>
+          <span class="chart-day">{{ d.label }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="card-x" style="padding: 14px 8px" data-reveal>
+      <div class="d-flex align-items-center px-3 pb-1">
+        <h2 class="card-title flex-grow-1">Recent orders</h2>
+        <a href="{{ url_for('admin.orders') }}" class="btn btn-link btn-sm">See all orders</a>
+      </div>
+      {% if recent %}
+      <div class="table-responsive">
+        <table class="data">
+          <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody>
+          {% for o in recent %}
+            <tr class="clickable rise" style="--d: {{ loop.index0 * 40 }}ms">
+              <td><a class="order-no" href="{{ url_for('admin.order_detail', order_id=o.id) }}">{{ o.number }}</a></td>
+              <td>{{ o.customer_name }}</td>
+              <td>{% set first = o.items[0] if o.items else None %}{% if first and first.product %}<img class="photo" style="width:32px;height:32px" src="{{ first.product.image_src() }}" alt="">{% else %}<span class="chip soft">{{ o.item_count }}</span>{% endif %}</td>
+              <td class="fw-bold">{{ o.total_amount|money(o.currency) }}</td>
+              <td class="text-muted">{{ o.created_at|ago }}</td>
+              <td>{% if o.is_paid %}<span class="chip green">Paid</span>{% else %}<span class="chip amber">Awaiting KHQR</span>{% endif %}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty py-4">{{ icon("task_alt") }}<p class="mb-0">No orders yet.</p></div>
+      {% endif %}
+    </section>
+  </div>
+
+  <div class="dash-col">
+    <section class="card-x card-pad" data-reveal data-reveal-index="1">
+      <div class="d-flex align-items-center gap-2">
+        <h2 class="card-title flex-grow-1">Live activity</h2>
+        <span class="chip green"><span class="dot"></span>Live</span>
+      </div>
+      {% set kinds = {"paid": ("payments", "green"), "order": ("shopping_bag", "brand"), "sold_out": ("inventory_2", "red")} %}
+      {% if events %}
+      <div>
+        {% for e in events %}
+        <a class="activity" href="{{ e.url }}">
+          <span class="act-icon {{ kinds[e.kind][1] }}">{{ icon(kinds[e.kind][0], "ms-sm") }}</span>
+          <span class="act-body"><span class="act-title d-block">{{ e.title }}</span><span class="act-text d-block">{{ e.text }}</span></span>
+          <span class="act-time">{{ e.at|ago }}</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty py-4">{{ icon("bolt") }}<p class="mb-0">Nothing has happened yet.</p></div>
+      {% endif %}
+    </section>
+
+    <section class="card-x card-pad" data-reveal data-reveal-index="2">
+      <div class="d-flex align-items-center">
+        <h2 class="card-title flex-grow-1">Low stock</h2>
+        <a href="{{ url_for('admin.products', filter='low') }}" class="btn btn-link btn-sm">All products</a>
+      </div>
+      {% if low_stock %}
+        {% for p in low_stock %}
+        <div class="d-flex align-items-center gap-3 py-2">
+          <img class="photo" src="{{ p.image_src() }}" alt="">
+          <a class="flex-grow-1 min-w-0 text-truncate fw-semibold text-reset text-decoration-none small" href="{{ url_for('admin.product_edit', product_id=p.id) }}">{{ p.name }}</a>
+          <span class="chip {{ 'red' if p.stock == 0 else 'amber' }}">{{ 'Sold out' if p.stock == 0 else p.stock ~ ' left' }}</span>
+          <form method="post" action="{{ url_for('admin.product_restock', product_id=p.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="next" value="{{ url_for('admin.dashboard') }}">
+            <button class="btn btn-tint btn-sm" title="Add 5 to stock">+5</button>
+          </form>
+        </div>
+        {% endfor %}
+      {% else %}
+      <div class="empty py-4">{{ icon("inventory") }}<p class="mb-0">Every product has more than 3 in stock.</p></div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

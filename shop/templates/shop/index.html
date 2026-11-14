@@ -1,37 +1,123 @@
 {% extends "base.html" %}
 {% block content %}
-{% if not q %}
-<section class="hero mb-5">
-  <div class="hero-text">
-    <span class="eyebrow">New arrivals every week</span>
-    <h1>Level up your<br>anime collection.</h1>
-    <p>Figures, plushies, manga box sets, hoodies and more for every otaku. Pay in seconds by scanning a KHQR code with any Cambodian banking app.</p>
-    <a href="#products" class="btn btn-light btn-lg fw-semibold">Shop now <i class="bi bi-arrow-down"></i></a>
+<nav class="pills" aria-label="Categories">
+  <a class="pill {% if not category %}active{% endif %}" href="{{ url_for('public.index', q=q or None) }}#products">All<span>{{ total_active }}</span></a>
+  {% for c, n in categories.items() %}
+  <a class="pill {% if c == category %}active{% endif %}" href="{{ url_for('public.index', category=c, q=q or None) }}#products">{{ c }}<span>{{ n }}</span></a>
+  {% endfor %}
+</nav>
+
+{% if not filtered %}
+{% set slides = [
+  ("banner_figures.webp", "NEW IN", "New figures every week", "Nendoroids and POP UP PARADE, straight from Japan", url_for('public.index', category='Figures') ~ '#products', "Shop figures"),
+  ("banner_plush.webp", "CUTE DEALS", "Soft plush friends", "Plushies to hug, from $29", url_for('public.index', category='Plush') ~ '#products', "Shop plush"),
+  ("banner_tcg.webp", "COLLECT THEM ALL", "Manga box sets", "One Piece, Demon Slayer and more in one box", url_for('public.index', category='Manga') ~ '#products', "Shop manga"),
+  ("banner_delivery.webp", "FREE DELIVERY", "Free delivery in Cambodia", "Pay with KHQR, we bring it to your door", '#products', "Start shopping"),
+] %}
+<section class="promo" aria-roledescription="carousel" aria-label="Shop highlights" data-carousel>
+  <div class="promo-viewport">
+    <div class="promo-track">
+      {% for img, tag, title, sub, href, cta in slides %}
+      <a class="promo-slide {% if loop.first %}is-active{% endif %}" href="{{ href }}" aria-roledescription="slide" aria-label="{{ loop.index }} of {{ slides|length }}: {{ title }}">
+        <img src="{{ url_for('static', filename='img/' ~ img) }}" alt="" {% if not loop.first %}loading="lazy"{% endif %}>
+        <span class="promo-text">
+          <span class="promo-tag">{{ tag }}</span>
+          <span class="promo-title d-block">{{ title }}</span>
+          <span class="promo-sub d-block">{{ sub }}</span>
+          <span class="promo-cta">{{ cta }} {{ icon("arrow_forward", "ms-sm") }}</span>
+        </span>
+      </a>
+      {% endfor %}
+    </div>
   </div>
-  <div class="hero-badges">
-    <div><i class="bi bi-qr-code-scan"></i><span>KHQR payment</span></div>
-    <div><i class="bi bi-truck"></i><span>Nationwide shipping</span></div>
-    <div><i class="bi bi-heart"></i><span>Made for fans</span></div>
+  <div class="promo-dots">
+    {% for s in slides %}<button type="button" aria-label="Show slide {{ loop.index }}" {% if loop.first %}aria-current="true"{% endif %}></button>{% endfor %}
   </div>
 </section>
 {% endif %}
 
-<div id="products" class="d-flex justify-content-between align-items-end mb-3">
-  <div>
-    <h2 class="section-title mb-0">{% if q %}Results for “{{ q }}”{% else %}All products{% endif %}</h2>
-    <small class="text-muted">{{ products|length }} item{{ '' if products|length == 1 else 's' }}</small>
-  </div>
-  {% if q %}<a href="{{ url_for('public.index') }}" class="btn btn-sm btn-link">Clear search</a>{% endif %}
-</div>
+<div id="products" class="shop-layout">
+  <aside class="filter-card card-x offcanvas-lg offcanvas-start" tabindex="-1" id="filters" aria-labelledby="filters-title">
+    <div class="offcanvas-header d-lg-none">
+      <h2 class="h5 mb-0" id="filters-title">Filters</h2>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#filters" aria-label="Close filters"></button>
+    </div>
+    <div class="offcanvas-body">
+      <form id="filter-form" method="get" action="{{ url_for('public.index') }}#products" class="w-100">
+        {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
+        {% if category %}<input type="hidden" name="category" value="{{ category }}">{% endif %}
+        <input type="hidden" name="sort" value="{{ sort }}">
 
-{% if products %}
-<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
-  {% for p in products %}{% include "shop/_product_card.html" %}{% endfor %}
+        <section class="filter-group">
+          <h3>{{ icon("category") }} Category</h3>
+          <ul class="cat-list">
+            <li><a class="{% if not category %}active{% endif %}" href="{{ url_for('public.index', q=q or None) }}#products">All products <span>{{ total_active }}</span></a></li>
+            {% for c, n in categories.items() %}
+            <li><a class="{% if c == category %}active{% endif %}" href="{{ url_for('public.index', category=c, q=q or None) }}#products">{{ c }} <span>{{ n }}</span></a></li>
+            {% endfor %}
+          </ul>
+        </section>
+
+        <section class="filter-group">
+          <h3>{{ icon("inventory_2") }} Availability</h3>
+          <label class="switch-row" for="in_stock">
+            <span>In stock only</span>
+            <input type="checkbox" id="in_stock" name="in_stock" value="1" {% if in_stock_only %}checked{% endif %} data-autosubmit>
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+        </section>
+
+        <section class="filter-group">
+          <h3>{{ icon("sell") }} Price (USD)</h3>
+          <div class="price-range">
+            <label class="visually-hidden" for="min">Minimum price</label>
+            <input class="form-control form-control-sm" type="number" min="0" step="1" id="min" name="min" placeholder="Min" value="{{ '%g'|format(min_price) if min_price is not none else '' }}">
+            <span aria-hidden="true">to</span>
+            <label class="visually-hidden" for="max">Maximum price</label>
+            <input class="form-control form-control-sm" type="number" min="0" step="1" id="max" name="max" placeholder="Max" value="{{ '%g'|format(max_price) if max_price is not none else '' }}">
+          </div>
+          <div class="price-presets">
+            <a href="{{ url_for('public.index', category=category or None, max=30) }}#products">Under $30</a>
+            <a href="{{ url_for('public.index', category=category or None, min=30, max=60) }}#products">$30 to $60</a>
+            <a href="{{ url_for('public.index', category=category or None, min=60) }}#products">Over $60</a>
+          </div>
+        </section>
+
+        <div class="d-grid gap-2">
+          <button class="btn btn-brand">{{ icon("tune", "ms-sm") }} Apply filters</button>
+          {% if filtered %}<a class="btn btn-line" href="{{ url_for('public.index') }}#products">Clear all</a>{% endif %}
+        </div>
+      </form>
+    </div>
+  </aside>
+
+  <section aria-labelledby="results-title">
+    <div class="sort-head">
+      <div>
+        <h2 id="results-title">{% if q %}Results for “{{ q }}”{% elif category %}{{ category }}{% elif filtered %}Filtered results{% else %}Popular now{% endif %}</h2>
+        <small>{{ products|length }} item{{ '' if products|length == 1 else 's' }}</small>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-line btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#filters" aria-controls="filters">{{ icon("tune", "ms-sm") }} Filters</button>
+        <label class="visually-hidden" for="sort">Sort by</label>
+        <select class="form-select form-select-sm" id="sort" data-sort style="width:auto">
+          {% for key, (label, _) in sorts.items() %}<option value="{{ key }}" {% if key == sort %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+
+    {% if products %}
+    <div class="row row-cols-2 row-cols-md-3 row-cols-xxl-4 g-3">
+      {% for p in products %}{% set reveal_index = loop.index0 % 6 %}{% include "shop/_product_card.html" %}{% endfor %}
+    </div>
+    {% else %}
+    <div class="empty card-x">
+      {{ icon("search_off") }}
+      <h2>No products match</h2>
+      <p>Try another category or a wider price range.</p>
+      <a href="{{ url_for('public.index') }}#products" class="btn btn-brand">Clear all filters</a>
+    </div>
+    {% endif %}
+  </section>
 </div>
-{% else %}
-<div class="empty-state">
-  <div class="empty-icon"><i class="bi bi-search"></i></div>
-  <p class="text-muted">No products found.</p>
-</div>
-{% endif %}
 {% endblock %}

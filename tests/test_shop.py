@@ -38,8 +38,14 @@ def place_order(client, app, qty=2):
 
 def test_home_lists_only_active_products(client):
     html = client.get("/").get_data(as_text=True)
-    assert "Ninja Hero Action Figure" in html
-    assert "Limited Collector Figure Box" not in html  # inactive
+    assert "Kuripan Plushie Chika Takami" in html
+    assert "Nendoroid Yoshiki" not in html  # inactive
+
+
+def test_category_filter(client):
+    html = client.get("/?category=Manga").get_data(as_text=True)
+    assert "One Piece Box Set 1" in html
+    assert "Kuripan Plushie" not in html
 
 
 def test_product_detail_has_share_links(client, app):
@@ -220,3 +226,81 @@ def test_bakong_payment_verification(app, monkeypatch):
                                                          "toAccountId": "test_shop@aclb"}))
         assert payments.refresh_status(order) == "PAID"
         assert order.payment_hash == "abc"
+
+
+def test_import_products_upserts(app, tmp_path):
+    from shop.importer import import_file
+    path = tmp_path / "items.csv"
+    path.write_text("name,category,price,stock,active,description\n"
+                    "Test Plush,Plush,9.50,4,yes,Soft\n"
+                    "Kuripan Plushie Chika Takami (Love Live! Sunshine!!),Plush,15.00,3,yes,Updated\n"
+                    ",Plush,1,1,yes,missing name\n", encoding="utf-8")
+    with app.app_context():
+        before = db.session.scalar(db.select(db.func.count(Product.id)))
+        result = import_file(path, download_images=False, log=lambda *_: None)
+        assert (result["created"], result["updated"], len(result["errors"])) == (1, 1, 1)
+        assert db.session.scalar(db.select(db.func.count(Product.id))) == before + 1
+        anya = db.session.scalar(db.select(Product).where(Product.name.like("Kuripan Plushie%")))
+        assert anya.price == Decimal("15.00") and anya.description == "Updated"
+        new = db.session.scalar(db.select(Product).where(Product.name == "Test Plush"))
+        assert new.category == "Plush" and new.image_data  # generated artwork
+
+
+def test_import_replace_keeps_order_history(client, app, tmp_path):
+    public_id, pid, _ = place_order(client, app, qty=1)
+    path = tmp_path / "one.json"
+    path.write_text('{"products": [{"name": "Only One", "price": 5, "stock": 1}]}', encoding="utf-8")
+    from shop.importer import import_file
+    with app.app_context():
+        import_file(path, replace=True, download_images=False, log=lambda *_: None)
+        assert db.session.scalars(db.select(Product.name)).all() == ["Only One"]
+        order = db.session.scalar(db.select(Order).where(Order.public_id == public_id))
+        assert order.items[0].product_id is None and order.items[0].product_name
+
+
+def test_store_filters_and_sort(client, app):
+    html = client.get("/?in_stock=1").get_data(as_text=True)
+    assert "Funko Pop! Jujutsu Kaisen Satoru Gojo" not in html  # stock 0
+    html = client.get("/?max=20&sort=price_asc").get_data(as_text=True)
+    assert "Nendoroid Hatsune Miku 3.0 [Basic]" in html
+    assert "One Piece Box Set 1" not in html
+    prices = [float(x) for x in re.findall(r'<span class="price">\$([\d.]+)</span>', client.get("/?sort=price_desc").get_data(as_text=True))]
+    assert prices == sorted(prices, reverse=True) and len(prices) > 5
+    assert client.get("/?min=abc&sort=bogus").status_code == 200
+
+
+def test_admin_dashboard(client, app):
+    public_id, *_ = place_order(client, app, qty=2)
+    token = csrf(client, f"/order/{public_id}/pay")
+    client.post(f"/order/{public_id}/simulate-payment", data={"csrf_token": token})
+    login(client)
+    r = client.get("/admin/")
+    html = r.get_data(as_text=True)
+    assert r.status_code == 200
+    assert "Revenue, last 7 days" in html and "Live activity" in html and "Sok Dara" in html
+    assert 'id="admin-sidebar"' in html and 'class="admin-footer"' in html
+
+
+def test_admin_restock_toggle_and_filters(client, app):
+    token = login(client)
+    with app.app_context():
+        p = db.session.scalar(db.select(Product).where(Product.is_active.is_(True), Product.stock > 0))
+        pid, stock = p.id, p.stock
+    client.post(f"/admin/products/{pid}/restock", data={"csrf_token": token})
+    client.post(f"/admin/products/{pid}/toggle", data={"csrf_token": token})
+    with app.app_context():
+        p = db.session.get(Product, pid)
+        assert p.stock == stock + 5 and not p.is_active
+    hidden = client.get("/admin/products?filter=hidden").get_data(as_text=True)
+    assert p.name.split(" (")[0] in hidden
+    sold_out = client.get("/admin/products?filter=soldout").get_data(as_text=True)
+    assert "Funko Pop! Jujutsu Kaisen Satoru Gojo" in sold_out
+    assert client.get("/admin/products?filter=low&q=zzz").status_code == 200
+
+
+def test_admin_order_search(client, app):
+    public_id, *_ = place_order(client, app, qty=1)
+    login(client)
+    assert "Sok Dara" in client.get("/admin/orders?q=sok").get_data(as_text=True)
+    assert "Sok Dara" not in client.get("/admin/orders?q=nobody").get_data(as_text=True)
+    assert "Sok Dara" in client.get("/admin/orders?q=%2300001").get_data(as_text=True)

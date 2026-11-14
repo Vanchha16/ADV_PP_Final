@@ -12,6 +12,7 @@ def app(tmp_path):
         "TESTING": True,
         "SQLALCHEMY_DATABASE_URI": f"sqlite:///{tmp_path / 'test.db'}",
         "PAYMENT_DEMO_MODE": True,
+        "SEED_DOWNLOAD_IMAGES": False,
         "BAKONG_TOKEN": "",
         "BAKONG_ACCOUNT_ID": "test_shop@aclb",
         "ADMIN_USERNAME": "admin",

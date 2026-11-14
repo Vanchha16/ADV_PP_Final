@@ -1,0 +1,191 @@
+{
+  "_about": "Real anime merchandise researched online in November 2026. Prices are the maker or retailer price at the source URL; yen prices converted at about 150 JPY = 1 USD. Stock numbers are demo values. image_url points to the product photo published by the maker, retailer or press (Open Library for book covers); the importer downloads it. crop picks which part of a wide photo to keep (left, center, right).",
+  "products": [
+    {
+      "name": "Nendoroid Vash the Stampede (Trigun Maximum)",
+      "category": "Figures",
+      "character": "Vash",
+      "price": 57.93,
+      "stock": 6,
+      "description": "Good Smile Company Nendoroid of Vash the Stampede from Trigun Maximum. About 10 cm tall, with three swappable faceplates, his revolver and posable parts so you can recreate his famous scenes.\n\nMaker price: 8,690 yen.",
+      "source": "https://www.toy-people.com/en/?p=112309",
+      "image_url": "https://img.toy-people.com/member/178451983010_1200.png",
+      "crop": "center"
+    },
+    {
+      "name": "Nendoroid Hatsune Miku 3.0 [Basic]",
+      "category": "Figures",
+      "character": "Miku",
+      "price": 19.87,
+      "stock": 20,
+      "description": "The newest, most affordable Nendoroid of Hatsune Miku from Character Vocal Series 01, part of the Nendoroid 3.0 [Basic] line with a simpler build and stand.\n\nGood Smile price: 2,980 yen.",
+      "image_url": "https://www.goodsmile.com/gsc-webrevo-sdk-storage-prd/product/image/1139898/ytw4QhAvZqGsJWr6E2NaPCm3SigcULDR.jpg",
+      "source": "https://www.goodsmile.com/en/product/1139898"
+    },
+    {
+      "name": "Nendoroid Hoshino Ichika (Project Sekai)",
+      "category": "Figures",
+      "character": "Ichika",
+      "price": 45.33,
+      "stock": 6,
+      "description": "Nendoroid of Hoshino Ichika, guitarist and vocalist of Leo/need from HATSUNE MIKU: COLORFUL STAGE! Comes with swappable face plates and her guitar.\n\nGood Smile price: 6,800 yen.",
+      "image_url": "https://www.goodsmile.com/gsc-webrevo-sdk-storage-prd/product/image/61236/Q0aciX5qUfYu8mCzgrFAkpD9tJjy41WL.jpg",
+      "source": "https://www.goodsmile.com/en/product/61236"
+    },
+    {
+      "name": "Nendoroid Seia Yurizono (Blue Archive)",
+      "category": "Figures",
+      "character": "Seia",
+      "price": 50.67,
+      "stock": 5,
+      "description": "Nendoroid of Seia Yurizono, member of Trinity General School's Tea Party in Blue Archive. Includes alternate expressions and accessories for tea-time poses.\n\nMaker price: 7,600 yen.",
+      "source": "https://haveagood-holiday.com/en/articles/blue-archive-seia-nendoroid-release",
+      "image_url": "https://assets.hldycdn.com/4f9cedff-d1a6-462f-8939-eeef7da95f34.jpeg"
+    },
+    {
+      "name": "Nendoroid Mika Misono (Blue Archive)",
+      "category": "Figures",
+      "character": "Mika",
+      "price": 48.67,
+      "stock": 7,
+      "description": "Re-release of the Nendoroid of Mika Misono from Blue Archive, with her wings, swappable faces and weapon parts.\n\nMaker price: 7,300 yen.",
+      "source": "https://haveagood-holiday.com/en/articles/blue-archive-mika-misono-nendoroid",
+      "image_url": "https://assets.hldycdn.com/964d231c-afd2-476a-9432-e323d15e18c1.jpeg"
+    },
+    {
+      "name": "Nendoroid Basic Mika Misono (Swimsuit) (Blue Archive)",
+      "category": "Figures",
+      "character": "Mika",
+      "price": 29.33,
+      "stock": 10,
+      "description": "Nendoroid Basic version of Mika Misono in her summer swimsuit. The Basic line is a simpler, lower-priced Nendoroid with one face and a stand.\n\nMaker price: 4,400 yen.",
+      "source": "https://www.haveagood-holiday.com/en/articles/blue-archive-mika-swimsuit-nendoroid-basic",
+      "image_url": "https://assets.hldycdn.com/7fe47886-672b-4d24-b862-a16108c5336f.jpeg"
+    },
+    {
+      "name": "Nendoroid Basic Hina Sorasaki (Dress) (Blue Archive)",
+      "category": "Figures",
+      "character": "Hina",
+      "price": 29.33,
+      "stock": 8,
+      "description": "Nendoroid Basic of Hina Sorasaki, Gehenna's Prefect Team leader, in her party dress outfit.\n\nMaker price: 4,400 yen including tax.",
+      "source": "https://www.toy-people.com/en/?p=112681",
+      "image_url": "https://img.toy-people.com/member/178530682913_1200.png",
+      "crop": "left"
+    },
+    {
+      "name": "Nendoroid Doll Himiko Toga (My Hero Academia)",
+      "category": "Figures",
+      "character": "Toga",
+      "price": 65.33,
+      "stock": 4,
+      "description": "Nendoroid Doll of Himiko Toga from My Hero Academia. Nendoroid Dolls have a cloth outfit and a fully posable doll body, so you can restyle and re-pose her.\n\nMaker price: 9,800 yen.",
+      "source": "https://www.toy-people.com/en/?p=104013",
+      "image_url": "https://img.toy-people.com/member/175947504468_1200.png",
+      "crop": "left"
+    },
+    {
+      "name": "Nendoroid Yoshiki (The Summer Hikaru Died)",
+      "category": "Figures",
+      "character": "Yoshiki",
+      "price": 44.0,
+      "stock": 0,
+      "active": false,
+      "description": "Nendoroid of Yoshiki from The Summer Hikaru Died. Scheduled for April 2027, so it stays hidden from the store until pre-orders open.\n\nMaker price: 6,600 yen.",
+      "source": "https://www.toy-people.com/en/?p=115522",
+      "image_url": "https://img.toy-people.com/member/179215583695_1200.png",
+      "crop": "left"
+    },
+    {
+      "name": "POP UP PARADE Frieren (Frieren: Beyond Journey's End)",
+      "category": "Figures",
+      "character": "Frieren",
+      "price": 31.99,
+      "stock": 12,
+      "description": "Good Smile Company POP UP PARADE figure of the elf mage Frieren. POP UP PARADE figures stand about 17 cm tall and come fully painted on a display base.\n\nGood Smile US store price: $31.99.",
+      "source": "https://www.siliconera.com/pop-up-parade-frieren-figure-is-ready-for-a-journey/",
+      "image_url": "https://www.siliconera.com/wp-content/uploads/2024/04/friefeat.png",
+      "crop": "right"
+    },
+    {
+      "name": "POP UP PARADE Frieren: Braided Hair Ver.",
+      "category": "Figures",
+      "character": "Frieren",
+      "price": 36.67,
+      "stock": 9,
+      "description": "A new POP UP PARADE of Frieren with her hair in braids, planned for October 2026. About 17 cm tall on a display base.\n\nMaker price: 5,500 yen including tax.",
+      "source": "https://haveagood-holiday.com/en/articles/pop-up-parade-frieren-braided-hair-ver-figure",
+      "image_url": "https://assets.hldycdn.com/b92da254-dc28-437b-a979-3d87bc92622c.jpeg"
+    },
+    {
+      "name": "POP UP PARADE Übel (Frieren: Beyond Journey's End)",
+      "category": "Figures",
+      "character": "Übel",
+      "price": 36.67,
+      "stock": 6,
+      "description": "POP UP PARADE figure of the first-class mage exam contestant Übel, released September 2026.\n\nMaker price: 5,500 yen.",
+      "source": "https://haveagood-holiday.com/en/articles/frieren-ubel-pop-up-parade-figure",
+      "image_url": "https://assets.hldycdn.com/88943a1c-137e-43f1-adc2-fe63b66d74d2.jpeg"
+    },
+    {
+      "name": "Funko Pop! Jujutsu Kaisen Satoru Gojo (Hidden Inventory) #1885",
+      "category": "Figures",
+      "character": "Gojo",
+      "price": 8.39,
+      "stock": 0,
+      "description": "Funko Pop! Animation #1885: Satoru Gojo from the Hidden Inventory arc of Jujutsu Kaisen, about 9.5 cm tall in a window box. Sold out for now; restock coming.\n\nRetail price seen at Target: $8.39.",
+      "source": "https://pops.today/animation/1885-satoru-gojo",
+      "image_url": "https://pops.today/images/POP_ANIMATION/Animation+1885.webp"
+    },
+    {
+      "name": "Kuripan Plushie Chika Takami (Love Live! Sunshine!!)",
+      "category": "Plush",
+      "character": "Chika",
+      "price": 29.33,
+      "stock": 15,
+      "description": "Good Smile Kuripan plushie of Chika Takami from Love Live! Sunshine!!, with a chibi design and cute feet shaped like hot dog buns. Riko and You are sold separately.\n\nGood Smile price: 4,400 yen.",
+      "image_url": "https://www.goodsmile.com/gsc-webrevo-sdk-storage-prd/product/image/35626/bc6191f1e213f6de1fcace19a62de08c.jpg",
+      "source": "https://www.goodsmile.com/en/product/35626"
+    },
+    {
+      "name": "The Dangers in My Heart Plushie Kyotaro Ichikawa",
+      "category": "Plush",
+      "character": "Kyotaro",
+      "price": 29.33,
+      "stock": 12,
+      "description": "Soft Good Smile plushie of Kyotaro Ichikawa from The Dangers in My Heart. Anna Yamada is sold separately.\n\nGood Smile price: 4,400 yen.",
+      "image_url": "https://www.goodsmile.com/gsc-webrevo-sdk-storage-prd/product/image/12234/7TFVqShxdML2bGBjuz5QmvyfWeAD6csr.jpg",
+      "source": "https://www.goodsmile.com/en/product/12234"
+    },
+    {
+      "name": "One Piece Box Set 1: East Blue and Baroque Works (Vol. 1-23)",
+      "category": "Manga",
+      "character": "Luffy",
+      "price": 244.99,
+      "stock": 3,
+      "description": "VIZ Media box set of One Piece volumes 1 to 23, covering the East Blue and Baroque Works arcs. Includes a Romance Dawn mini-comic and a two-sided color poster. ISBN 9781421560748.\n\nVIZ list price: $244.99.",
+      "source": "https://shop.viz.com/products/one-piece-box-set-1-east-blue-and-baroque-works-volumes-1-23-with-premium",
+      "image_url": "https://covers.openlibrary.org/b/isbn/9781421560748-L.jpg"
+    },
+    {
+      "name": "The Legend of Zelda Manga Box Set",
+      "category": "Manga",
+      "character": "Link",
+      "price": 104.99,
+      "stock": 4,
+      "description": "VIZ box set of The Legend of Zelda manga by Akira Himekawa, ten volumes adapting the classic games, with a bonus poster.\n\nList price: $104.99.",
+      "source": "https://store.crunchyroll.com/products/legend-of-zelda-box-set-9781421542423.html",
+      "image_url": "https://covers.openlibrary.org/b/isbn/9781421542423-L.jpg"
+    },
+    {
+      "name": "Demon Slayer Complete Box Set (Vol. 1-23)",
+      "category": "Manga",
+      "character": "Tanjiro",
+      "price": 199.99,
+      "stock": 4,
+      "description": "VIZ Media box set with all 23 volumes of Demon Slayer: Kimetsu no Yaiba by Koyoharu Gotouge, plus a booklet and a double-sided poster. ISBN 9781974725953.\n\nSuggested retail price: $199.99.",
+      "image_url": "https://covers.openlibrary.org/b/isbn/9781974725953-L.jpg",
+      "source": "https://www.animenewsnetwork.com/encyclopedia/releases.php?id=38669"
+    }
+  ]
+}
