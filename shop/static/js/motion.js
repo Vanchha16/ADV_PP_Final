@@ -66,33 +66,27 @@
     window.addEventListener('scroll', update, { passive: true });
   });
 
-  /* ---------- promo banner slider (MA: PromoCarousel) ---------- */
-  $$('[data-carousel]').forEach(box => {
-    const track = box.querySelector('.promo-track');
-    const slides = $$('.promo-slide', box);
-    const dots = $$('.promo-dots button', box);
-    let i = 0, timer = null;
-    const go = (n) => {
-      i = (n + slides.length) % slides.length;
-      track.style.transform = `translateX(-${i * 100}%)`;
-      slides.forEach((s, k) => { s.classList.toggle('is-active', k === i); s.tabIndex = k === i ? 0 : -1; s.setAttribute('aria-hidden', String(k !== i)); });
-      dots.forEach((d, k) => d.setAttribute('aria-current', String(k === i)));
-    };
-    const play = () => { if (!reduce && slides.length > 1) { stop(); timer = setInterval(() => go(i + 1), 5000); } };
-    const stop = () => clearInterval(timer);
-    dots.forEach((d, k) => d.addEventListener('click', () => { go(k); play(); }));
-    box.addEventListener('mouseenter', stop);
-    box.addEventListener('mouseleave', play);
-    box.addEventListener('focusin', stop);
-    let x0 = null;
-    box.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; stop(); }, { passive: true });
-    box.addEventListener('touchend', e => {
-      if (x0 === null) return;
-      const dx = e.changedTouches[0].clientX - x0;
-      if (Math.abs(dx) > 40) go(i + (dx < 0 ? 1 : -1));
-      x0 = null; play();
-    });
-    go(0); play();
+  /* ---------- home: the thumbnails switch the featured pair ---------- */
+  $$('[data-stage]').forEach(stage => {
+    const field = (name) => stage.querySelector(`[data-f="${name}"]`);
+    const img = field('img');
+    const copy = stage.querySelector('.stage-copy');
+    const picks = $$('.pick', stage);
+    picks.forEach(pick => pick.addEventListener('click', () => {
+      if (pick.getAttribute('aria-pressed') === 'true') return;
+      const d = pick.dataset;
+      picks.forEach(p => p.setAttribute('aria-pressed', String(p === pick)));
+      field('brand').textContent = d.brand;
+      field('name').textContent = d.name;
+      field('price').textContent = d.price;
+      field('stock').textContent = d.stock;
+      field('id').value = d.id;
+      field('href').href = d.href;
+      img.src = d.img;
+      if (!reduce) {
+        [img, copy].forEach(el => { el.classList.remove('is-in'); void el.offsetWidth; el.classList.add('is-in'); });
+      }
+    }));
   });
 
   /* ---------- quantity steppers ---------- */
@@ -115,9 +109,6 @@
 
   /* ---------- store filters ---------- */
   $$('[data-autosubmit]').forEach(el => el.addEventListener('change', () => el.form && el.form.requestSubmit()));
-  const sort = document.querySelector('[data-sort]');
-  const filterForm = document.getElementById('filter-form');
-  if (sort && filterForm) sort.addEventListener('change', () => { filterForm.elements.sort.value = sort.value; filterForm.requestSubmit(); });
 
   /* ---------- add to cart: the round button turns green with a tick ---------- */
   $$('form[action$="/cart/add"]').forEach(form => form.addEventListener('submit', () => {

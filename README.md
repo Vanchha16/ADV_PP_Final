@@ -13,7 +13,7 @@ Admins manage products and view order history.
 ### Customer (guest) pages
 | Page | URL | What it does |
 |---|---|---|
-| Home | `/` | Product grid with name, price, description, thumbnail; **View Details** and **Add to Cart**; search box and category filter (Basketball, Lifestyle, Running) |
+| Home | `/` | Featured pair you can switch with thumbnails and add to cart; shop by category and by brand; product grid with name, price, thumbnail, **View Details** and **Add to Cart**; filter chips (category, price, in stock), sort, and search from the header |
 | Product detail | `/product/<id>` | Full description, price, stock status, image; quantity selector + **Add to Cart**; **Share to Facebook / Telegram** (plus copy link; Open Graph tags give a rich preview) |
 | Cart | `/cart` | Items with quantity, unit price, subtotal and total; update quantities or remove items; **Proceed to Checkout** |
 | Checkout | `/checkout` | Guest form: Full Name, Email, Phone, Shipping Address (validated) |
@@ -34,8 +34,8 @@ Screenshots: [product](docs/screenshots/product.png) · [cart](docs/screenshots/
 - **Flask 3** (app factory + blueprints), **Flask‑SQLAlchemy** (SQLite locally, PostgreSQL in production)
 - **bakong-khqr** to build the EMVCo KHQR string, **qrcode** to render it, **Bakong Open API** (`check_transaction_by_md5`) to confirm payment
 - **Pillow** to validate and resize uploaded images (stored in the DB so they survive redeploys)
-- **UI:** same design as our MA project (mobile app + web admin): sky-blue brand, Roboto, Material Symbols Rounded icons, light / dark / system theme, the Sneakers Shop logo and sneaker promo banners. Bootstrap 5 grid (bundled in `static/vendor`).
-- **pytest** test suite (23 tests)
+- **UI:** same design as our MA project (mobile app + web admin): sky-blue brand, Roboto, Material Symbols Rounded icons, light / dark / system theme, the Sneakers Shop logo, Archivo condensed for big sneaker names. Bootstrap 5 grid (bundled in `static/vendor`).
+- **pytest** test suite (26 tests)
 
 ## Project structure
 ```
@@ -58,7 +58,7 @@ ADV_PP_Final/
 │   ├── importer.py              # `flask import-products` (JSON / CSV, photo download, pad crop)
 │   ├── seed.py                  # first-start catalogue + generated fallback images
 │   ├── views/
-│   │   ├── public.py            # store: home, product, cart, checkout, KHQR pay, confirmation
+│   │   ├── public.py            # store: home (featured pairs, brands, filters), product, cart, checkout, KHQR pay
 │   │   └── admin.py             # admin: login, dashboard, products (CRUD, restock, hide), orders
 │   ├── templates/
 │   │   ├── base.html            # store layout: header + menu, footer, toasts
@@ -70,13 +70,13 @@ ADV_PP_Final/
 │   │   └── errors/error.html    # 404 / 500 page
 │   └── static/
 │       ├── css/style.css        # whole design: tokens, light / dark theme, store + admin
-│       ├── js/motion.js         # theme switch, banner slider, reveal animations, toasts, sidebar
-│       ├── img/                 # logo.png, logo-full.webp, favicon.png, banner_*.webp,
-│       │                        #   pay-bakong.png, placeholder.svg
+│       ├── js/motion.js         # theme switch, header search, featured-pair switcher, reveal animations, toasts
+│       ├── img/                 # logo.png, logo-full.webp, favicon.png, pay-bakong.png,
+│       │                        #   placeholder.svg
 │       └── vendor/bootstrap/    # Bootstrap 5 (served locally, no CDN)
 ├── tests/
 │   ├── conftest.py              # app + client fixtures (temporary SQLite, demo payments)
-│   └── test_shop.py             # 23 tests: store, cart, checkout, KHQR, admin, importer, menu
+│   └── test_shop.py             # 26 tests: store, filters, cart, checkout, KHQR, admin, importer, header
 ├── bakong_proxy/proxy.py        # optional relay for servers outside Cambodia
 └── docs/screenshots/            # images used in this README
 ```

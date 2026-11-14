@@ -46,6 +46,54 @@ SORTS = {
 }
 
 
+# Brand -> how its product names start. Used for "Shop by brand" and the ?brand= filter.
+BRANDS = [
+    ("Jordan", "Air Jordan"), ("Nike", "Nike"), ("adidas", "adidas"), ("New Balance", "New Balance"),
+    ("ASICS", "ASICS"), ("HOKA", "HOKA"), ("Salomon", "Salomon"), ("Converse", "Converse"),
+    ("Onitsuka Tiger", "Onitsuka Tiger"), ("Vans", "Vans"),
+]
+BRAND_PREFIX = dict(BRANDS)
+FILTER_ARGS = ("q", "category", "brand", "in_stock", "min", "max", "sort")
+
+
+def brand_of(name):
+    for brand, prefix in BRANDS:
+        if name.lower().startswith(prefix.lower()):
+            return brand
+    return None
+
+
+def _shop_url(**changes):
+    """URL of the store with the current filters, some of them changed (None removes one)."""
+    args = {k: v for k, v in request.args.items() if k in FILTER_ARGS and v}
+    for key, value in changes.items():
+        if value in (None, ""):
+            args.pop(key, None)
+        else:
+            args[key] = value
+    if args.get("sort") == "new":
+        args.pop("sort")
+    return url_for("public.index", **args) + "#products"
+
+
+def _home_picks(products):
+    """Hero pairs (priciest in-stock pair per category + best pair under $100) and one photo per category."""
+    in_stock = sorted((p for p in products if p.in_stock), key=lambda p: (-p.price, p.id))
+    featured, seen = [], set()
+    for p in in_stock:
+        if p.category and p.category not in seen:
+            featured.append(p)
+            seen.add(p.category)
+    deal = next((p for p in in_stock if p.price <= 100 and p not in featured), None)
+    if deal:
+        featured.append(deal)
+    tiles = {}
+    for p in in_stock:
+        if p.category and p.category not in tiles and p not in featured:
+            tiles[p.category] = p
+    return featured[:4], tiles
+
+
 def _money_arg(name):
     try:
         value = Decimal(request.args.get(name, "").strip())
@@ -58,6 +106,9 @@ def _money_arg(name):
 def index():
     q = request.args.get("q", "").strip()
     category = request.args.get("category", "").strip()
+    brand = request.args.get("brand", "").strip()
+    if brand not in BRAND_PREFIX:
+        brand = ""
     in_stock_only = request.args.get("in_stock") == "1"
     min_price, max_price = _money_arg("min"), _money_arg("max")
     sort = request.args.get("sort", "new")
@@ -76,6 +127,8 @@ def index():
     stmt = db.select(Product).where(active)
     if category:
         stmt = stmt.where(Product.category == category)
+    if brand:
+        stmt = stmt.where(Product.name.ilike(BRAND_PREFIX[brand] + "%"))
     if q:
         like = f"%{q}%"
         stmt = stmt.where(or_(Product.name.ilike(like), Product.description.ilike(like),
@@ -88,11 +141,21 @@ def index():
         stmt = stmt.where(Product.price <= max_price)
     products = db.session.scalars(stmt.order_by(*SORTS[sort][1])).all()
 
-    filtered = bool(q or category or in_stock_only or min_price is not None or max_price is not None)
-    return render_template("shop/index.html", products=products, q=q, category=category,
+    filtered = bool(q or category or brand or in_stock_only or min_price is not None or max_price is not None)
+    featured, tiles, brands = [], {}, []
+    if not filtered:
+        featured, tiles = _home_picks(products)
+        per_brand = {}
+        for p in products:
+            b = brand_of(p.name)
+            if b:
+                per_brand[b] = per_brand.get(b, 0) + 1
+        brands = [(b, per_brand[b]) for b, _ in BRANDS if b in per_brand]
+    return render_template("shop/index.html", products=products, q=q, category=category, brand=brand,
                            categories=counts, total_active=total_active, in_stock_only=in_stock_only,
                            min_price=min_price, max_price=max_price, sort=sort, sorts=SORTS,
-                           filtered=filtered)
+                           filtered=filtered, featured=featured, tiles=tiles, brands=brands,
+                           brand_of=brand_of, shop_url=_shop_url)
 
 
 @bp.get("/product/<int:product_id>")

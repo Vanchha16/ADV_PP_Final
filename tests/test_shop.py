@@ -333,3 +333,22 @@ def test_header_search_open_on_results(client):
     html = client.get("/?q=jordan").get_data(as_text=True)
     assert 'id="site-search" hidden' not in html
     assert 'aria-expanded="true"' in html and 'value="jordan"' in html
+
+
+def test_home_featured_pairs_and_brands(client):
+    html = client.get("/").get_data(as_text=True)
+    assert "data-stage" in html and html.count('class="pick"') == 4
+    assert "Shop by brand" in html and 'href="/?brand=Jordan#products"' in html
+    assert 'id="filters"' not in html  # the filter sidebar is gone
+    # featured pairs are in stock, so the sold-out Jordan 1 is never the hero
+    hero = html.split('id="stage-name"')[1].split("</h1>")[0]
+    assert "Lost and Found" not in hero
+
+
+def test_brand_filter_and_chip_links_keep_other_filters(client):
+    html = client.get("/?brand=Jordan").get_data(as_text=True)
+    assert "Air Jordan 4 Retro Military Black" in html and "Vans Old Skool" not in html
+    assert "data-stage" not in html  # filtered pages skip the hero
+    html = client.get("/?category=Running&in_stock=1").get_data(as_text=True)
+    assert 'href="/?category=Running&amp;in_stock=1&amp;max=100#products"' in html
+    assert client.get("/?brand=NotABrand").status_code == 200

@@ -1,116 +1,127 @@
 {% extends "base.html" %}
+{% macro stock_text(p) -%}
+  {%- if not p.in_stock %}Sold out{% elif p.stock <= 3 %}Only {{ p.stock }} left{% else %}In stock{% endif -%}
+{%- endmacro %}
 {% block content %}
-{% if not filtered %}
-{% set slides = [
-  ("banner_basketball.webp", "NEW IN", "Jordan retros are here", "Air Jordan 1, 3 and 4 in their classic colourways", url_for('public.index', category='Basketball') ~ '#products', "Shop basketball"),
-  ("banner_lifestyle.webp", "EVERYDAY CLASSICS", "Dunks, Sambas and more", "Street favourites from $70", url_for('public.index', category='Lifestyle') ~ '#products', "Shop lifestyle"),
-  ("banner_running.webp", "RUN IN STYLE", "Runners that do it all", "New Balance, ASICS, HOKA and Salomon", url_for('public.index', category='Running') ~ '#products', "Shop running"),
-  ("banner_delivery.webp", "FREE DELIVERY", "Free delivery in Cambodia", "Pay with KHQR, we bring it to your door", '#products', "Start shopping"),
-] %}
-<section class="promo" aria-roledescription="carousel" aria-label="Shop highlights" data-carousel>
-  <div class="promo-viewport">
-    <div class="promo-track">
-      {% for img, tag, title, sub, href, cta in slides %}
-      <a class="promo-slide {% if loop.first %}is-active{% endif %}" href="{{ href }}" aria-roledescription="slide" aria-label="{{ loop.index }} of {{ slides|length }}: {{ title }}">
-        <img src="{{ url_for('static', filename='img/' ~ img) }}" alt="" {% if not loop.first %}loading="lazy"{% endif %}>
-        <span class="promo-text">
-          <span class="promo-tag">{{ tag }}</span>
-          <span class="promo-title d-block">{{ title }}</span>
-          <span class="promo-sub d-block">{{ sub }}</span>
-          <span class="promo-cta">{{ cta }} {{ icon("arrow_forward", "ms-sm") }}</span>
-        </span>
-      </a>
-      {% endfor %}
+
+{% if not filtered and featured %}
+{# Featured pairs: one big shoe, its name in large type, thumbnails to switch pairs. #}
+{% set f = featured[0] %}
+<section class="stage" aria-labelledby="stage-name" data-stage>
+  <div class="stage-copy">
+    <p class="stage-brand" data-f="brand">{{ brand_of(f.name) or f.category }}</p>
+    <h1 class="stage-name" id="stage-name" data-f="name">{{ f.name }}</h1>
+    <p class="stage-meta">
+      <span class="stage-price" data-f="price">{{ f.price|money }}</span>
+      <span class="stage-stock" data-f="stock">{{ stock_text(f) }}</span>
+    </p>
+    <div class="stage-actions">
+      <form method="post" action="{{ url_for('public.cart_add') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="product_id" value="{{ f.id }}" data-f="id">
+        <input type="hidden" name="quantity" value="1">
+        <input type="hidden" name="next" value="{{ request.full_path }}">
+        <button class="btn btn-brand btn-lg">{{ icon("add_shopping_cart", "ms-sm") }} Add to cart</button>
+      </form>
+      <a class="btn btn-line btn-lg" href="{{ url_for('public.product_detail', product_id=f.id) }}" data-f="href">See details</a>
     </div>
   </div>
-  <div class="promo-dots">
-    {% for s in slides %}<button type="button" aria-label="Show slide {{ loop.index }}" {% if loop.first %}aria-current="true"{% endif %}></button>{% endfor %}
+  <div class="stage-shoe">
+    <img src="{{ f.image_src() }}" alt="" width="864" height="864" data-f="img">
+  </div>
+  {% if featured|length > 1 %}
+  <div class="stage-picks" role="group" aria-label="Choose a featured pair">
+    {% for p in featured %}
+    <button type="button" class="pick" aria-pressed="{{ 'true' if loop.first else 'false' }}"
+            data-id="{{ p.id }}" data-name="{{ p.name }}" data-brand="{{ brand_of(p.name) or p.category }}"
+            data-price="{{ p.price|money }}" data-stock="{{ stock_text(p) }}" data-img="{{ p.image_src() }}"
+            data-href="{{ url_for('public.product_detail', product_id=p.id) }}">
+      <img src="{{ p.image_src() }}" alt="" loading="lazy" width="64" height="64">
+      <span class="visually-hidden">Show {{ p.name }}</span>
+    </button>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+
+<section class="home-block" aria-labelledby="cats-title">
+  <h2 class="home-h" id="cats-title">Shop by category</h2>
+  <div class="cat-tiles">
+    {% for c, n in categories.items() %}
+    <a class="cat-tile" href="{{ shop_url(category=c) }}">
+      {% if tiles.get(c) %}<img src="{{ tiles[c].image_src() }}" alt="" loading="lazy" width="864" height="864">{% endif %}
+      <span class="cat-name">{{ c }}</span>
+      <span class="cat-count">{{ n }} pair{{ '' if n == 1 else 's' }}</span>
+    </a>
+    {% endfor %}
   </div>
 </section>
+
+{% if brands %}
+<section class="home-block" aria-labelledby="brands-title">
+  <h2 class="home-h" id="brands-title">Shop by brand</h2>
+  <ul class="brand-list">
+    {% for b, n in brands %}
+    <li><a href="{{ shop_url(brand=b) }}">{{ b }}<sup aria-label="{{ n }} pair{{ '' if n == 1 else 's' }}">{{ n }}</sup></a></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
 {% endif %}
 
-<div id="products" class="shop-layout">
-  <aside class="filter-card card-x offcanvas-lg offcanvas-start" tabindex="-1" id="filters" aria-labelledby="filters-title">
-    <div class="offcanvas-header d-lg-none">
-      <h2 class="h5 mb-0" id="filters-title">Filters</h2>
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#filters" aria-label="Close filters"></button>
+{% set presets = [("Under $100", none, 100), ("$100 to $150", 100, 150), ("Over $150", 150, none)] %}
+<section id="products" class="catalog" aria-labelledby="results-title">
+  <div class="catalog-head">
+    <div>
+      <h2 id="results-title">
+        {%- if q %}Results for “{{ q }}”
+        {%- elif brand %}{{ brand }}
+        {%- elif category %}{{ category }}
+        {%- elif max_price == 100 and min_price is none %}Under $100
+        {%- elif filtered %}Filtered results
+        {%- else %}All sneakers{% endif -%}
+      </h2>
+      <p class="catalog-count">{{ products|length }} pair{{ '' if products|length == 1 else 's' }}{% if filtered %} · <a href="{{ url_for('public.index') }}#products">Clear filters</a>{% endif %}</p>
     </div>
-    <div class="offcanvas-body">
-      <form id="filter-form" method="get" action="{{ url_for('public.index') }}#products" class="w-100">
-        {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
-        {% if category %}<input type="hidden" name="category" value="{{ category }}">{% endif %}
-        <input type="hidden" name="sort" value="{{ sort }}">
+    <form class="sort-form" method="get" action="{{ url_for('public.index') }}#products">
+      {% for k in ("q", "category", "brand", "in_stock", "min", "max") %}{% if request.args.get(k) %}<input type="hidden" name="{{ k }}" value="{{ request.args.get(k) }}">{% endif %}{% endfor %}
+      <label for="sort">Sort</label>
+      <select class="form-select form-select-sm" id="sort" name="sort" data-autosubmit>
+        {% for key, (label, _) in sorts.items() %}<option value="{{ key }}" {% if key == sort %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+      <noscript><button class="btn btn-line btn-sm">Sort</button></noscript>
+    </form>
+  </div>
 
-        <section class="filter-group">
-          <h3>{{ icon("category") }} Category</h3>
-          <ul class="cat-list">
-            <li><a class="{% if not category %}active{% endif %}" href="{{ url_for('public.index', q=q or None) }}#products">All products <span>{{ total_active }}</span></a></li>
-            {% for c, n in categories.items() %}
-            <li><a class="{% if c == category %}active{% endif %}" href="{{ url_for('public.index', category=c, q=q or None) }}#products">{{ c }} <span>{{ n }}</span></a></li>
-            {% endfor %}
-          </ul>
-        </section>
-
-        <section class="filter-group">
-          <h3>{{ icon("inventory_2") }} Availability</h3>
-          <label class="switch-row" for="in_stock">
-            <span>In stock only</span>
-            <input type="checkbox" id="in_stock" name="in_stock" value="1" {% if in_stock_only %}checked{% endif %} data-autosubmit>
-            <span class="switch" aria-hidden="true"></span>
-          </label>
-        </section>
-
-        <section class="filter-group">
-          <h3>{{ icon("sell") }} Price (USD)</h3>
-          <div class="price-range">
-            <label class="visually-hidden" for="min">Minimum price</label>
-            <input class="form-control form-control-sm" type="number" min="0" step="1" id="min" name="min" placeholder="Min" value="{{ '%g'|format(min_price) if min_price is not none else '' }}">
-            <span aria-hidden="true">to</span>
-            <label class="visually-hidden" for="max">Maximum price</label>
-            <input class="form-control form-control-sm" type="number" min="0" step="1" id="max" name="max" placeholder="Max" value="{{ '%g'|format(max_price) if max_price is not none else '' }}">
-          </div>
-          <div class="price-presets">
-            <a href="{{ url_for('public.index', category=category or None, max=100) }}#products">Under $100</a>
-            <a href="{{ url_for('public.index', category=category or None, min=100, max=150) }}#products">$100 to $150</a>
-            <a href="{{ url_for('public.index', category=category or None, min=150) }}#products">Over $150</a>
-          </div>
-        </section>
-
-        <div class="d-grid gap-2">
-          <button class="btn btn-brand">{{ icon("tune", "ms-sm") }} Apply filters</button>
-          {% if filtered %}<a class="btn btn-line" href="{{ url_for('public.index') }}#products">Clear all</a>{% endif %}
-        </div>
-      </form>
-    </div>
-  </aside>
-
-  <section aria-labelledby="results-title">
-    <div class="sort-head">
-      <div>
-        <h2 id="results-title">{% if q %}Results for “{{ q }}”{% elif category %}{{ category }}{% elif filtered %}Filtered results{% else %}Popular now{% endif %}</h2>
-        <small>{{ products|length }} item{{ '' if products|length == 1 else 's' }}</small>
-      </div>
-      <div class="d-flex align-items-center gap-2">
-        <button class="btn btn-line btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#filters" aria-controls="filters">{{ icon("tune", "ms-sm") }} Filters</button>
-        <label class="visually-hidden" for="sort">Sort by</label>
-        <select class="form-select form-select-sm" id="sort" data-sort style="width:auto">
-          {% for key, (label, _) in sorts.items() %}<option value="{{ key }}" {% if key == sort %}selected{% endif %}>{{ label }}</option>{% endfor %}
-        </select>
-      </div>
-    </div>
-
-    {% if products %}
-    <div class="row row-cols-2 row-cols-md-3 row-cols-xxl-4 g-3">
-      {% for p in products %}{% set reveal_index = loop.index0 % 6 %}{% include "shop/_product_card.html" %}{% endfor %}
-    </div>
-    {% else %}
-    <div class="empty card-x">
-      {{ icon("search_off") }}
-      <h2>No products match</h2>
-      <p>Try another category or a wider price range.</p>
-      <a href="{{ url_for('public.index') }}#products" class="btn btn-brand">Clear all filters</a>
-    </div>
+  <nav class="toolbar" aria-label="Filter sneakers">
+    <a class="fchip {{ 'on' if not category }}" href="{{ shop_url(category=none) }}" {% if not category %}aria-current="true"{% endif %}>All <span class="n">{{ total_active }}</span></a>
+    {% for c, n in categories.items() %}
+    <a class="fchip {{ 'on' if c == category }}" href="{{ shop_url(category=c) }}" {% if c == category %}aria-current="true"{% endif %}>{{ c }} <span class="n">{{ n }}</span></a>
+    {% endfor %}
+    <span class="sep" aria-hidden="true"></span>
+    {% for label, lo, hi in presets %}
+    {% set on = min_price == lo and max_price == hi %}
+    <a class="fchip {{ 'on' if on }}" href="{{ shop_url(min=none, max=none) if on else shop_url(min=lo, max=hi) }}" {% if on %}aria-current="true"{% endif %}>{{ label }}</a>
+    {% endfor %}
+    <span class="sep" aria-hidden="true"></span>
+    <a class="fchip {{ 'on' if in_stock_only }}" href="{{ shop_url(in_stock=none if in_stock_only else 1) }}" {% if in_stock_only %}aria-current="true"{% endif %}>{{ icon("check" if in_stock_only else "inventory_2", "ms-sm") }} In stock only</a>
+    {% if brand %}
+    <span class="sep" aria-hidden="true"></span>
+    <a class="fchip on" href="{{ shop_url(brand=none) }}" aria-label="Remove brand filter {{ brand }}">{{ brand }} {{ icon("close", "ms-sm") }}</a>
     {% endif %}
-  </section>
-</div>
+  </nav>
+
+  {% if products %}
+  <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-3">
+    {% for p in products %}{% set reveal_index = loop.index0 % 8 %}{% include "shop/_product_card.html" %}{% endfor %}
+  </div>
+  {% else %}
+  <div class="empty card-x">
+    {{ icon("search_off") }}
+    <h2>No sneakers match</h2>
+    <p>Try another category, brand or price.</p>
+    <a href="{{ url_for('public.index') }}#products" class="btn btn-brand">Clear filters</a>
+  </div>
+  {% endif %}
+</section>
 {% endblock %}
