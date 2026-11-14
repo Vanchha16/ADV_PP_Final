@@ -9,9 +9,9 @@
 
 {% if not filtered %}
 {% set slides = [
-  ("banner_figures.webp", "NEW IN", "New figures every week", "Nendoroids and POP UP PARADE, straight from Japan", url_for('public.index', category='Figures') ~ '#products', "Shop figures"),
-  ("banner_plush.webp", "CUTE DEALS", "Soft plush friends", "Plushies to hug, from $29", url_for('public.index', category='Plush') ~ '#products', "Shop plush"),
-  ("banner_tcg.webp", "COLLECT THEM ALL", "Manga box sets", "One Piece, Demon Slayer and more in one box", url_for('public.index', category='Manga') ~ '#products', "Shop manga"),
+  ("banner_basketball.webp", "NEW IN", "Jordan retros are here", "Air Jordan 1, 3 and 4 in their classic colourways", url_for('public.index', category='Basketball') ~ '#products', "Shop basketball"),
+  ("banner_lifestyle.webp", "EVERYDAY CLASSICS", "Dunks, Sambas and more", "Street favourites from $70", url_for('public.index', category='Lifestyle') ~ '#products', "Shop lifestyle"),
+  ("banner_running.webp", "RUN IN STYLE", "Runners that do it all", "New Balance, ASICS, HOKA and Salomon", url_for('public.index', category='Running') ~ '#products', "Shop running"),
   ("banner_delivery.webp", "FREE DELIVERY", "Free delivery in Cambodia", "Pay with KHQR, we bring it to your door", '#products', "Start shopping"),
 ] %}
 <section class="promo" aria-roledescription="carousel" aria-label="Shop highlights" data-carousel>
@@ -77,9 +77,9 @@
             <input class="form-control form-control-sm" type="number" min="0" step="1" id="max" name="max" placeholder="Max" value="{{ '%g'|format(max_price) if max_price is not none else '' }}">
           </div>
           <div class="price-presets">
-            <a href="{{ url_for('public.index', category=category or None, max=30) }}#products">Under $30</a>
-            <a href="{{ url_for('public.index', category=category or None, min=30, max=60) }}#products">$30 to $60</a>
-            <a href="{{ url_for('public.index', category=category or None, min=60) }}#products">Over $60</a>
+            <a href="{{ url_for('public.index', category=category or None, max=100) }}#products">Under $100</a>
+            <a href="{{ url_for('public.index', category=category or None, min=100, max=150) }}#products">$100 to $150</a>
+            <a href="{{ url_for('public.index', category=category or None, min=150) }}#products">Over $150</a>
           </div>
         </section>
 

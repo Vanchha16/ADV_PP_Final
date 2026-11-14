@@ -34,7 +34,7 @@ class Config:
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
 
-    SHOP_NAME = os.environ.get("SHOP_NAME", "Anime World Shop")
+    SHOP_NAME = os.environ.get("SHOP_NAME", "Sneakers Shop")
     ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
     ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
 

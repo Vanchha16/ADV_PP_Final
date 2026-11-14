@@ -1,6 +1,6 @@
 """Starter catalogue and fallback product images.
 
-The catalogue lives in data/products.json (real products researched online).
+The catalogue lives in data/products.json (real sneakers researched online).
 Photos are downloaded from each product's image_url; if a download fails the
 product gets a simple generated image instead, so the shop never shows a blank.
 """
@@ -39,7 +39,7 @@ def _font(size, bold=True):
 
 
 def make_artwork(name, colors, label=None, category=None, size=800):
-    """Plain placeholder: tinted square with the character name and category."""
+    """Plain placeholder: tinted square with a short label (model name) and category."""
     bg, fg = _hex(colors[0]), _hex(colors[1])
     img = Image.new("RGB", (size, size), bg)
     d = ImageDraw.Draw(img)

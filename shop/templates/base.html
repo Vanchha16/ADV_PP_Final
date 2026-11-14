@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{{ shop_name }}{% endblock %}</title>
-  {% block meta %}<meta name="description" content="{{ shop_name }}: official anime figures, plush and manga delivered across Cambodia, paid with KHQR.">{% endblock %}
+  {% block meta %}<meta name="description" content="{{ shop_name }}: authentic Jordan, Nike, adidas, New Balance and ASICS sneakers delivered across Cambodia, paid with KHQR.">{% endblock %}
   {{ head_assets() }}
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -16,11 +16,11 @@
     <div class="brandbar">
       <a class="brand" href="{{ url_for('public.index') }}">
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="" width="40" height="40">
-        <span><strong>Anime World</strong><small>Hi there! Find your next favourite.</small></span>
+        <span><strong>Sneakers Shop</strong><small>Hi there! Find your next pair.</small></span>
       </a>
       <form class="search-pill" action="{{ url_for('public.index') }}" role="search">
         {{ icon("search") }}
-        <input type="search" name="q" value="{{ q or '' }}" placeholder="Search figures, plush, manga…" aria-label="Search products" maxlength="100">
+        <input type="search" name="q" value="{{ q or '' }}" placeholder="Search Jordan, Dunk, Samba…" aria-label="Search products" maxlength="100">
         <button aria-label="Search">{{ icon("arrow_forward") }}</button>
       </form>
       <div class="bar-actions">
@@ -48,9 +48,9 @@
       <div>
         <a class="brand" href="{{ url_for('public.index') }}">
           <img src="{{ url_for('static', filename='img/logo.png') }}" alt="" width="40" height="40">
-          <span><strong>Anime World</strong></span>
+          <span><strong>Sneakers Shop</strong></span>
         </a>
-        <p class="mt-2 mb-0" style="max-width: 34ch">Official anime figures, plush and manga, delivered across Cambodia.</p>
+        <p class="mt-2 mb-0" style="max-width: 34ch">Authentic sneakers from Jordan, Nike, adidas, New Balance and more, delivered across Cambodia.</p>
       </div>
       <div>
         <h2>Shop</h2>

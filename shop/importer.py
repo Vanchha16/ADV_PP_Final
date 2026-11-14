@@ -6,7 +6,9 @@ JSON: {"products": [{...}, ...]}  or a plain list of objects.
 CSV:  a header row with the same field names.
 
 Fields: name (required), price (required), stock, category, description, active,
-        image_url, crop (left | center | right, for wide photos), character, source.
+        image_url, crop (pad | left | center | right, for wide photos), label, source.
+crop "pad" puts a wide photo on a white square so nothing is cut off (best for shoes).
+label is the short text drawn on the fallback image (older files may call it character).
 Products are matched by name: an existing product is updated, a new one is created.
 """
 import csv
@@ -26,7 +28,7 @@ from .seed import PALETTES, make_artwork
 
 MAX_DOWNLOAD = 8 * 1024 * 1024
 TRUE = {"1", "true", "yes", "y", "on", "active"}
-USER_AGENT = "Mozilla/5.0 (compatible; AnimeWorldShop-importer/1.0)"
+USER_AGENT = "Mozilla/5.0 (compatible; SneakerWorld-importer/1.0)"
 
 
 def load_rows(path):
@@ -52,16 +54,23 @@ def _palette(name):
 
 
 def _crop_square(body, where):
-    """Cut a square out of a wide photo: the left, center or right part."""
+    """Make a wide photo square: pad it onto white, or cut the left, center or right part."""
     img = Image.open(body)
     img.load()
     w, h = img.size
     if w <= h * 1.1:
         body.seek(0)
         return body
-    x = {"left": 0, "right": w - h}.get(where, (w - h) // 2)
+    if where == "pad":
+        side = round(w * 1.08)  # small margin so the shoe doesn't touch the card edge
+        square = Image.new("RGB", (side, side), (255, 255, 255))
+        square.paste(img.convert("RGB"), ((side - w) // 2, (side - h) // 2))
+        img = square
+    else:
+        x = {"left": 0, "right": w - h}.get(where, (w - h) // 2)
+        img = img.crop((x, 0, x + h, h))
     out = io.BytesIO()
-    img.crop((x, 0, x + h, h)).save(out, format="PNG")
+    img.save(out, format="PNG")
     out.seek(0)
     return out
 
@@ -134,7 +143,7 @@ def import_rows(rows, replace=False, download_images=True, log=print, timeout=20
         elif image_url:
             product.image_url = image_url
         if not image_url and (is_new or not product.image_data):
-            label = str(row.get("character") or "").strip() or name.split()[0]
+            label = str(row.get("label") or row.get("character") or "").strip() or name.split()[0]
             product.image_data = make_artwork(name, _palette(name), label=label, category=product.category)
             product.image_mime = "image/jpeg"
             product.image_url = None
