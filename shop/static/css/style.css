@@ -175,6 +175,20 @@ html.dark .brand strong { color: var(--brand); }
   .brand small { display: none; }
 }
 
+/* header menu: shop sections */
+.mainnav { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; margin: -4px 0 0; padding: 0 0 10px; }
+.mainnav::-webkit-scrollbar { display: none; }
+.mainnav a { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px;
+  color: var(--ink); font-weight: 600; font-size: 14px; text-decoration: none; transition: background-color .2s ease, color .2s ease; }
+.mainnav a .ms { color: var(--muted); transition: color .2s ease; }
+.mainnav a:hover { background: var(--card); color: var(--brand); }
+.mainnav a:hover .ms { color: var(--brand); }
+.mainnav a.active { background: var(--brand); color: var(--brand-on); }
+.mainnav a.active .ms { color: inherit; }
+.mainnav a.deal:not(.active) { color: var(--coral); }
+.mainnav a.deal:not(.active) .ms { color: var(--coral); }
+.mainnav a:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
 /* category pills (MA: Series Chips) */
 .pills { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 10px; scrollbar-width: none; }
 .pills::-webkit-scrollbar { display: none; }

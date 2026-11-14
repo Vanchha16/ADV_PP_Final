@@ -33,6 +33,21 @@
         </a>
       </div>
     </div>
+    {% set on_index = request.endpoint == 'public.index' %}
+    {% set cur_cat = request.args.get('category') if on_index else None %}
+    {% set cur_max = request.args.get('max') if on_index else None %}
+    {% set links = [
+      ("Home", "home", url_for('public.index'), on_index and not cur_cat and not cur_max and not request.args.get('q')),
+      ("Basketball", "sports_basketball", url_for('public.index', category='Basketball'), cur_cat == 'Basketball'),
+      ("Lifestyle", "steps", url_for('public.index', category='Lifestyle'), cur_cat == 'Lifestyle'),
+      ("Running", "directions_run", url_for('public.index', category='Running'), cur_cat == 'Running'),
+      ("Under $100", "sell", url_for('public.index', max=100), not cur_cat and cur_max == '100'),
+    ] %}
+    <nav class="mainnav" aria-label="Shop sections">
+      {% for label, ico, href, active in links %}
+      <a href="{{ href }}" class="{{ 'active' if active }}{{ ' deal' if loop.last }}" {% if active %}aria-current="page"{% endif %}>{{ icon(ico, "ms-sm") }}{{ label }}</a>
+      {% endfor %}
+    </nav>
   </div>
 </header>
 

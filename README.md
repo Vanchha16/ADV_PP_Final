@@ -35,31 +35,53 @@ Screenshots: [product](docs/screenshots/product.png) · [cart](docs/screenshots/
 - **bakong-khqr** to build the EMVCo KHQR string, **qrcode** to render it, **Bakong Open API** (`check_transaction_by_md5`) to confirm payment
 - **Pillow** to validate and resize uploaded images (stored in the DB so they survive redeploys)
 - **UI:** same design as our MA project (mobile app + web admin): sky-blue brand, Roboto, Material Symbols Rounded icons, light / dark / system theme, the Sneakers Shop logo and sneaker promo banners. Bootstrap 5 grid (bundled in `static/vendor`).
-- **pytest** test suite (22 tests)
+- **pytest** test suite (23 tests)
 
 ## Project structure
 ```
-anime-world-shop/
-├── wsgi.py                 # entry point (gunicorn wsgi:app)
-├── shop/
-│   ├── __init__.py         # create_app(): config, blueprints, filters, CSRF, auto-seed
-│   ├── config.py           # settings from environment / .env
-│   ├── models.py           # Product, Order, OrderItem
-│   ├── cart.py             # session-based cart
-│   ├── payments.py         # KHQR generation, Bakong status check, settle order
-│   ├── images.py           # upload validation / resize
-│   ├── security.py         # CSRF + admin login guard
-│   ├── seed.py             # first-start catalogue + fallback images
-│   ├── importer.py         # import-products command (JSON / CSV)
-│   ├── views/public.py     # customer pages
-│   ├── views/admin.py      # admin pages
-│   ├── templates/          # Jinja2 templates (shop/, admin/, errors/)
-│   └── static/             # css, js/motion.js (theme, slider, motion), logo + banners, vendored Bootstrap
-├── data/products.json      # researched product catalogue (prices, photos, sources)
-├── tests/                  # pytest
-├── bakong_proxy/proxy.py   # optional relay for servers outside Cambodia
-├── requirements.txt, Procfile, render.yaml, .env.example
+ADV_PP_Final/
+├── wsgi.py                      # entry point: flask --app wsgi run / gunicorn wsgi:app
+├── requirements.txt             # Flask, Flask-SQLAlchemy, Pillow, bakong-khqr, requests, ...
+├── Procfile, render.yaml        # deploy config (gunicorn + PostgreSQL on Render)
+├── .env.example                 # copy to .env: SHOP_NAME, SECRET_KEY, admin login, Bakong keys
+├── data/
+│   └── products.json            # 19 researched sneakers: price, stock, StockX photo + source link
+├── shop/                        # the Flask app
+│   ├── __init__.py              # create_app(): config, blueprints, filters, CSRF, auto-seed, CLI commands
+│   ├── config.py                # settings read from environment / .env
+│   ├── extensions.py            # SQLAlchemy instance
+│   ├── models.py                # Product, Order, OrderItem, AppMeta
+│   ├── cart.py                  # session cart {product_id: quantity}
+│   ├── payments.py              # KHQR generation, Bakong status check, settle order
+│   ├── security.py              # CSRF token + admin login guard
+│   ├── images.py                # validate and resize uploaded / downloaded photos
+│   ├── importer.py              # `flask import-products` (JSON / CSV, photo download, pad crop)
+│   ├── seed.py                  # first-start catalogue + generated fallback images
+│   ├── views/
+│   │   ├── public.py            # store: home, product, cart, checkout, KHQR pay, confirmation
+│   │   └── admin.py             # admin: login, dashboard, products (CRUD, restock, hide), orders
+│   ├── templates/
+│   │   ├── base.html            # store layout: header + menu, footer, toasts
+│   │   ├── _macros.html         # shared head (fonts, theme), icon() helper
+│   │   ├── shop/                # index, product, cart, checkout, pay, confirmation,
+│   │   │                        #   _product_card, _summary
+│   │   ├── admin/               # base (sidebar), login, dashboard, products, product_form,
+│   │   │                        #   orders, order_detail
+│   │   └── errors/error.html    # 404 / 500 page
+│   └── static/
+│       ├── css/style.css        # whole design: tokens, light / dark theme, store + admin
+│       ├── js/motion.js         # theme switch, banner slider, reveal animations, toasts, sidebar
+│       ├── img/                 # logo.png, logo-full.webp, favicon.png, banner_*.webp,
+│       │                        #   pay-bakong.png, placeholder.svg
+│       └── vendor/bootstrap/    # Bootstrap 5 (served locally, no CDN)
+├── tests/
+│   ├── conftest.py              # app + client fixtures (temporary SQLite, demo payments)
+│   └── test_shop.py             # 23 tests: store, cart, checkout, KHQR, admin, importer, menu
+├── bakong_proxy/proxy.py        # optional relay for servers outside Cambodia
+└── docs/screenshots/            # images used in this README
 ```
+
+**How a purchase flows through the code:** `views/public.py` lists products from `models.py` → the cart is kept in the session by `cart.py` → checkout creates an `Order` → `payments.py` makes the KHQR and checks Bakong every few seconds → when paid, stock is reduced and the confirmation page is shown. The admin side (`views/admin.py`) reads the same models.
 
 ## Run locally
 ```bash

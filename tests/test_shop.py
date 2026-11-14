@@ -317,3 +317,12 @@ def test_pad_crop_keeps_whole_wide_photo():
     assert out.width == out.height > 800  # square, nothing cut off
     assert out.getpixel((2, 2)) == (255, 255, 255)  # white margin
     assert out.getpixel((out.width // 2, out.height // 2)) == (200, 0, 0)
+
+
+def test_header_menu_marks_current_section(client):
+    html = client.get("/").get_data(as_text=True)
+    assert 'class="mainnav"' in html and "Under $100" in html
+    html = client.get("/?category=Running").get_data(as_text=True)
+    assert 'href="/?category=Running" class="active"' in html
+    html = client.get("/?max=100").get_data(as_text=True)
+    assert 'class="active deal"' in html

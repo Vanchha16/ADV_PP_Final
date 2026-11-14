@@ -175,6 +175,13 @@
     }
   });
 
+  /* ---------- header menu: on phones, scroll the current section into view ---------- */
+  const navActive = document.querySelector('.mainnav a.active');
+  if (navActive) {
+    const nav = navActive.parentElement;
+    nav.scrollLeft = navActive.offsetLeft - (nav.clientWidth - navActive.offsetWidth) / 2;
+  }
+
   /* ---------- admin sidebar (slides in below 992px) ---------- */
   const closeSidebar = () => document.body.classList.remove('sidebar-open');
   $$('[data-sidebar-toggle]').forEach(b => b.addEventListener('click', () => document.body.classList.toggle('sidebar-open')));
