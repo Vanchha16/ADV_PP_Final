@@ -38,14 +38,14 @@ def place_order(client, app, qty=2):
 
 def test_home_lists_only_active_products(client):
     html = client.get("/").get_data(as_text=True)
-    assert "Kuripan Plushie Chika Takami" in html
-    assert "Nendoroid Yoshiki" not in html  # inactive
+    assert "Nike Dunk Low Retro White Black Panda" in html
+    assert "New Balance 530 White Silver Navy" not in html  # inactive
 
 
 def test_category_filter(client):
-    html = client.get("/?category=Manga").get_data(as_text=True)
-    assert "One Piece Box Set 1" in html
-    assert "Kuripan Plushie" not in html
+    html = client.get("/?category=Basketball").get_data(as_text=True)
+    assert "Air Jordan 4 Retro Military Black" in html
+    assert "Vans Old Skool" not in html
 
 
 def test_product_detail_has_share_links(client, app):
@@ -232,18 +232,18 @@ def test_import_products_upserts(app, tmp_path):
     from shop.importer import import_file
     path = tmp_path / "items.csv"
     path.write_text("name,category,price,stock,active,description\n"
-                    "Test Plush,Plush,9.50,4,yes,Soft\n"
-                    "Kuripan Plushie Chika Takami (Love Live! Sunshine!!),Plush,15.00,3,yes,Updated\n"
-                    ",Plush,1,1,yes,missing name\n", encoding="utf-8")
+                    "Test Runner,Running,9.50,4,yes,Light\n"
+                    "Vans Old Skool Black White,Lifestyle,15.00,3,yes,Updated\n"
+                    ",Running,1,1,yes,missing name\n", encoding="utf-8")
     with app.app_context():
         before = db.session.scalar(db.select(db.func.count(Product.id)))
         result = import_file(path, download_images=False, log=lambda *_: None)
         assert (result["created"], result["updated"], len(result["errors"])) == (1, 1, 1)
         assert db.session.scalar(db.select(db.func.count(Product.id))) == before + 1
-        anya = db.session.scalar(db.select(Product).where(Product.name.like("Kuripan Plushie%")))
-        assert anya.price == Decimal("15.00") and anya.description == "Updated"
-        new = db.session.scalar(db.select(Product).where(Product.name == "Test Plush"))
-        assert new.category == "Plush" and new.image_data  # generated artwork
+        vans = db.session.scalar(db.select(Product).where(Product.name.like("Vans Old Skool%")))
+        assert vans.price == Decimal("15.00") and vans.description == "Updated"
+        new = db.session.scalar(db.select(Product).where(Product.name == "Test Runner"))
+        assert new.category == "Running" and new.image_data  # generated artwork
 
 
 def test_import_replace_keeps_order_history(client, app, tmp_path):
@@ -260,10 +260,10 @@ def test_import_replace_keeps_order_history(client, app, tmp_path):
 
 def test_store_filters_and_sort(client, app):
     html = client.get("/?in_stock=1").get_data(as_text=True)
-    assert "Funko Pop! Jujutsu Kaisen Satoru Gojo" not in html  # stock 0
-    html = client.get("/?max=20&sort=price_asc").get_data(as_text=True)
-    assert "Nendoroid Hatsune Miku 3.0 [Basic]" in html
-    assert "One Piece Box Set 1" not in html
+    assert "Air Jordan 1 Retro High OG Chicago Lost and Found" not in html  # stock 0
+    html = client.get("/?max=80&sort=price_asc").get_data(as_text=True)
+    assert "Vans Old Skool Black White" in html
+    assert "Air Jordan 4 Retro Military Black" not in html
     prices = [float(x) for x in re.findall(r'<span class="price">\$([\d.]+)</span>', client.get("/?sort=price_desc").get_data(as_text=True))]
     assert prices == sorted(prices, reverse=True) and len(prices) > 5
     assert client.get("/?min=abc&sort=bogus").status_code == 200
@@ -294,7 +294,7 @@ def test_admin_restock_toggle_and_filters(client, app):
     hidden = client.get("/admin/products?filter=hidden").get_data(as_text=True)
     assert p.name.split(" (")[0] in hidden
     sold_out = client.get("/admin/products?filter=soldout").get_data(as_text=True)
-    assert "Funko Pop! Jujutsu Kaisen Satoru Gojo" in sold_out
+    assert "Air Jordan 1 Retro High OG Chicago Lost and Found" in sold_out
     assert client.get("/admin/products?filter=low&q=zzz").status_code == 200
 
 
@@ -304,3 +304,25 @@ def test_admin_order_search(client, app):
     assert "Sok Dara" in client.get("/admin/orders?q=sok").get_data(as_text=True)
     assert "Sok Dara" not in client.get("/admin/orders?q=nobody").get_data(as_text=True)
     assert "Sok Dara" in client.get("/admin/orders?q=%2300001").get_data(as_text=True)
+
+
+def test_pad_crop_keeps_whole_wide_photo():
+    import io
+    from PIL import Image
+    from shop.importer import _crop_square
+    buf = io.BytesIO()
+    Image.new("RGB", (800, 571), (200, 0, 0)).save(buf, format="PNG")
+    buf.seek(0)
+    out = Image.open(_crop_square(buf, "pad"))
+    assert out.width == out.height > 800  # square, nothing cut off
+    assert out.getpixel((2, 2)) == (255, 255, 255)  # white margin
+    assert out.getpixel((out.width // 2, out.height // 2)) == (200, 0, 0)
+
+
+def test_header_menu_marks_current_section(client):
+    html = client.get("/").get_data(as_text=True)
+    assert 'class="mainnav"' in html and "Under $100" in html
+    html = client.get("/?category=Running").get_data(as_text=True)
+    assert 'href="/?category=Running" class="active"' in html
+    html = client.get("/?max=100").get_data(as_text=True)
+    assert 'class="active deal"' in html

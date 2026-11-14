@@ -21,7 +21,7 @@
       </div>
       <div class="mb-3">
         <label for="category" class="form-label">Category</label>
-        <input id="category" name="category" class="form-control" value="{{ data.category or '' }}" maxlength="40" list="category-list" placeholder="e.g. Figures, Plush, Manga">
+        <input id="category" name="category" class="form-control" value="{{ data.category or '' }}" maxlength="40" list="category-list" placeholder="e.g. Basketball, Lifestyle, Running">
         <datalist id="category-list">{% for c in categories %}<option value="{{ c }}">{% endfor %}</datalist>
       </div>
       <div class="mb-3">

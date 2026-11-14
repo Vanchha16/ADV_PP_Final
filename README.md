@@ -1,6 +1,6 @@
-# Anime World Shop: Mini E‑commerce with KHQR Payment
+# Sneakers Shop: Mini E‑commerce with KHQR Payment
 
-Final project for **Advanced Python Programming (ADV PP)**: a mini anime-merchandise web store (figures, plush, manga, apparel) built with **Python + Flask**.
+Final project for **Advanced Python Programming (ADV PP)**: a mini sneaker web store (basketball, lifestyle and running shoes) built with **Python + Flask**.
 Customers browse products, manage a cart, and pay by scanning a **Bakong KHQR** code.
 Admins manage products and view order history.
 
@@ -13,7 +13,7 @@ Admins manage products and view order history.
 ### Customer (guest) pages
 | Page | URL | What it does |
 |---|---|---|
-| Home | `/` | Product grid with name, price, description, thumbnail; **View Details** and **Add to Cart**; search box and category filter (Figures, Plush, Manga) |
+| Home | `/` | Product grid with name, price, description, thumbnail; **View Details** and **Add to Cart**; search box and category filter (Basketball, Lifestyle, Running) |
 | Product detail | `/product/<id>` | Full description, price, stock status, image; quantity selector + **Add to Cart**; **Share to Facebook / Telegram** (plus copy link; Open Graph tags give a rich preview) |
 | Cart | `/cart` | Items with quantity, unit price, subtotal and total; update quantities or remove items; **Proceed to Checkout** |
 | Checkout | `/checkout` | Guest form: Full Name, Email, Phone, Shipping Address (validated) |
@@ -34,32 +34,54 @@ Screenshots: [product](docs/screenshots/product.png) · [cart](docs/screenshots/
 - **Flask 3** (app factory + blueprints), **Flask‑SQLAlchemy** (SQLite locally, PostgreSQL in production)
 - **bakong-khqr** to build the EMVCo KHQR string, **qrcode** to render it, **Bakong Open API** (`check_transaction_by_md5`) to confirm payment
 - **Pillow** to validate and resize uploaded images (stored in the DB so they survive redeploys)
-- **UI:** same design as our MA project (Anime World mobile app + web admin): sky-blue brand, Roboto, Material Symbols Rounded icons, light / dark / system theme, logo and promo banners from the app. Bootstrap 5 grid (bundled in `static/vendor`).
-- **pytest** test suite (21 tests)
+- **UI:** same design as our MA project (mobile app + web admin): sky-blue brand, Roboto, Material Symbols Rounded icons, light / dark / system theme, the Sneakers Shop logo and sneaker promo banners. Bootstrap 5 grid (bundled in `static/vendor`).
+- **pytest** test suite (23 tests)
 
 ## Project structure
 ```
-anime-world-shop/
-├── wsgi.py                 # entry point (gunicorn wsgi:app)
-├── shop/
-│   ├── __init__.py         # create_app(): config, blueprints, filters, CSRF, auto-seed
-│   ├── config.py           # settings from environment / .env
-│   ├── models.py           # Product, Order, OrderItem
-│   ├── cart.py             # session-based cart
-│   ├── payments.py         # KHQR generation, Bakong status check, settle order
-│   ├── images.py           # upload validation / resize
-│   ├── security.py         # CSRF + admin login guard
-│   ├── seed.py             # first-start catalogue + fallback images
-│   ├── importer.py         # import-products command (JSON / CSV)
-│   ├── views/public.py     # customer pages
-│   ├── views/admin.py      # admin pages
-│   ├── templates/          # Jinja2 templates (shop/, admin/, errors/)
-│   └── static/             # css, js/motion.js (theme, slider, motion), logo + banners, vendored Bootstrap
-├── data/products.json      # researched product catalogue (prices, photos, sources)
-├── tests/                  # pytest
-├── bakong_proxy/proxy.py   # optional relay for servers outside Cambodia
-├── requirements.txt, Procfile, render.yaml, .env.example
+ADV_PP_Final/
+├── wsgi.py                      # entry point: flask --app wsgi run / gunicorn wsgi:app
+├── requirements.txt             # Flask, Flask-SQLAlchemy, Pillow, bakong-khqr, requests, ...
+├── Procfile, render.yaml        # deploy config (gunicorn + PostgreSQL on Render)
+├── .env.example                 # copy to .env: SHOP_NAME, SECRET_KEY, admin login, Bakong keys
+├── data/
+│   └── products.json            # 19 researched sneakers: price, stock, StockX photo + source link
+├── shop/                        # the Flask app
+│   ├── __init__.py              # create_app(): config, blueprints, filters, CSRF, auto-seed, CLI commands
+│   ├── config.py                # settings read from environment / .env
+│   ├── extensions.py            # SQLAlchemy instance
+│   ├── models.py                # Product, Order, OrderItem, AppMeta
+│   ├── cart.py                  # session cart {product_id: quantity}
+│   ├── payments.py              # KHQR generation, Bakong status check, settle order
+│   ├── security.py              # CSRF token + admin login guard
+│   ├── images.py                # validate and resize uploaded / downloaded photos
+│   ├── importer.py              # `flask import-products` (JSON / CSV, photo download, pad crop)
+│   ├── seed.py                  # first-start catalogue + generated fallback images
+│   ├── views/
+│   │   ├── public.py            # store: home, product, cart, checkout, KHQR pay, confirmation
+│   │   └── admin.py             # admin: login, dashboard, products (CRUD, restock, hide), orders
+│   ├── templates/
+│   │   ├── base.html            # store layout: header + menu, footer, toasts
+│   │   ├── _macros.html         # shared head (fonts, theme), icon() helper
+│   │   ├── shop/                # index, product, cart, checkout, pay, confirmation,
+│   │   │                        #   _product_card, _summary
+│   │   ├── admin/               # base (sidebar), login, dashboard, products, product_form,
+│   │   │                        #   orders, order_detail
+│   │   └── errors/error.html    # 404 / 500 page
+│   └── static/
+│       ├── css/style.css        # whole design: tokens, light / dark theme, store + admin
+│       ├── js/motion.js         # theme switch, banner slider, reveal animations, toasts, sidebar
+│       ├── img/                 # logo.png, logo-full.webp, favicon.png, banner_*.webp,
+│       │                        #   pay-bakong.png, placeholder.svg
+│       └── vendor/bootstrap/    # Bootstrap 5 (served locally, no CDN)
+├── tests/
+│   ├── conftest.py              # app + client fixtures (temporary SQLite, demo payments)
+│   └── test_shop.py             # 23 tests: store, cart, checkout, KHQR, admin, importer, menu
+├── bakong_proxy/proxy.py        # optional relay for servers outside Cambodia
+└── docs/screenshots/            # images used in this README
 ```
+
+**How a purchase flows through the code:** `views/public.py` lists products from `models.py` → the cart is kept in the session by `cart.py` → checkout creates an `Order` → `payments.py` makes the KHQR and checks Bakong every few seconds → when paid, stock is reduced and the confirmation page is shown. The admin side (`views/admin.py`) reads the same models.
 
 ## Run locally
 ```bash
@@ -89,7 +111,7 @@ pip install pytest && python -m pytest -q
 ```
 
 ## Product catalogue and import script
-`data/products.json` holds 18 real anime products researched online in November 2026: Good Smile Nendoroids and POP UP PARADE figures, a Funko Pop!, Good Smile plushies and VIZ manga box sets. Each entry keeps its `source` link. Prices are the maker or retailer price at that source, with yen converted at about ¥150 = $1. Stock numbers are demo values.
+`data/products.json` holds 19 real sneakers researched online in November 2026: Air Jordan 1, 3 and 4, Nike Dunk, Air Force 1 and Air Max 90, adidas Samba and Campus, New Balance 550, 530 and 9060, ASICS Gel-Kayano 14 and Gel-1130, HOKA Clifton 9, Salomon XT-6, Converse Chuck 70, Onitsuka Tiger Mexico 66 and Vans Old Skool. Each entry keeps its `source` link (the StockX product page). Prices are the US retail price listed there. Stock numbers are demo values.
 
 Import or update products (matched by name) from JSON or CSV:
 ```bash
@@ -97,10 +119,10 @@ flask --app wsgi import-products data/products.json            # add new, update
 flask --app wsgi import-products data/products.json --replace  # start the catalogue over (order history is kept)
 flask --app wsgi import-products my-items.csv --no-download-images
 ```
-Fields: `name`, `price` (required), `stock`, `category`, `description`, `active`, `image_url`, `crop` (`left` / `center` / `right` to square a wide photo), `character`, `source`.
+Fields: `name`, `price` (required), `stock`, `category`, `description`, `active`, `image_url`, `crop` (`pad` puts a wide photo on a white square so the whole shoe shows; `left` / `center` / `right` cut a square instead), `label` (short text for the generated placeholder), `source`.
 Photos from `image_url` are downloaded, resized and stored in the database. If a download fails, the product gets a generated placeholder instead.
 
-> Product photos belong to their makers and publishers (Good Smile Company, Funko, VIZ Media; book covers via Open Library). They are used here for a non-commercial school project; replace them with your own photos before any real sale.
+> Product photos come from StockX and belong to their owners and the brands (Nike, Jordan Brand, adidas, New Balance, ASICS, HOKA, Salomon, Converse, Onitsuka Tiger, Vans). They are used here for a non-commercial school project; replace them with your own photos before any real sale.
 
 ## KHQR payment: how it works
 1. At checkout the order is saved as **PENDING** together with its customer details and line items.
