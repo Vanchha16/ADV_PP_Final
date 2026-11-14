@@ -15,7 +15,7 @@
 {% set cur_cat = request.args.get('category') if on_index else None %}
 {% set cur_max = request.args.get('max') if on_index else None %}
 {% set nav_links = [
-  ("Home", "home", url_for('public.index'), on_index and not cur_cat and not cur_max and not request.args.get('q')),
+  ("Home", "home", url_for('public.index'), on_index and not filtered),
   ("Basketball", "sports_basketball", url_for('public.index', category='Basketball'), cur_cat == 'Basketball'),
   ("Lifestyle", "steps", url_for('public.index', category='Lifestyle'), cur_cat == 'Lifestyle'),
   ("Running", "directions_run", url_for('public.index', category='Running'), cur_cat == 'Running'),
