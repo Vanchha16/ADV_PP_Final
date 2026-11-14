@@ -153,41 +153,81 @@ html.dark .switch { background: var(--line); }
 .switch-row input:focus-visible + .switch { outline: 2px solid var(--brand); outline-offset: 2px; }
 
 /* =========================================================== STORE */
+/* announcement strip above the header */
+.announce { background: var(--ink); color: #e2e8f0; font-size: 12.5px; font-weight: 500; }
+html.dark .announce { background: #05070a; color: #cbd5e1; }
+.announce-inner { display: flex; justify-content: center; align-items: center; gap: 22px; margin: 0; padding: 7px 0; flex-wrap: wrap; row-gap: 2px; }
+.announce-inner span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.announce-inner .ms { color: var(--brand-light); }
+
+/* header: logo · menu · actions in one row */
 .topbar { position: sticky; top: 0; z-index: 1030; background: color-mix(in srgb, var(--page) 88%, transparent); backdrop-filter: blur(14px);
-  transition: box-shadow .25s ease; }
-.topbar.is-scrolled { box-shadow: 0 6px 20px rgba(2, 132, 199, .1); }
-.brandbar { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
+  border-bottom: 1px solid transparent; transition: box-shadow .25s ease, border-color .25s ease; }
+.topbar.is-scrolled { box-shadow: 0 6px 20px rgba(2, 132, 199, .1); border-bottom-color: var(--line); }
+.navrow { display: flex; align-items: center; gap: 14px; min-height: 72px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); flex: none; }
 .brand img { width: 40px; height: 40px; }
-.brand strong { display: block; font-size: 20px; font-weight: 700; line-height: 1.1; color: var(--brand-dark); }
+.brand strong { display: block; font-size: 20px; font-weight: 800; line-height: 1.1; color: var(--brand-dark); letter-spacing: -.01em; }
 html.dark .brand strong { color: var(--brand); }
 .brand small { display: block; font-size: 13px; color: var(--muted); }
-.search-pill { flex: 1; max-width: 560px; margin: 0 auto; display: flex; align-items: center; gap: 8px; background: var(--card);
-  border-radius: 999px; padding: 4px 4px 4px 16px; box-shadow: var(--shadow); }
-.search-pill > .ms { color: var(--muted); }
-.search-pill input { flex: 1; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 14px; padding: 8px 0; min-width: 0; }
-.search-pill input::placeholder { color: var(--muted); }
-.search-pill button { width: 38px; height: 38px; border-radius: 50%; border: 0; background: var(--brand); color: var(--brand-on); display: grid; place-items: center; flex: none; }
+
+.mainnav { display: none; align-items: center; gap: 4px; margin: 0 auto; }
+.mainnav a { position: relative; padding: 10px 14px; color: var(--ink); font-weight: 600; font-size: 15px; text-decoration: none;
+  border-radius: 10px; transition: color .2s ease, background-color .2s ease; }
+.mainnav a::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: 3px; height: 3px; border-radius: 3px;
+  background: currentColor; transform: scaleX(0); transition: transform .25s cubic-bezier(.22, 1, .36, 1); }
+.mainnav a:hover { color: var(--brand); }
+.mainnav a:hover::after { transform: scaleX(.5); }
+.mainnav a.active { color: var(--brand); }
+.mainnav a.active::after { transform: scaleX(1); }
+.mainnav a.deal { color: var(--coral); }
+.mainnav a:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+@media (min-width: 992px) { .mainnav { display: flex; } }
+
 .bar-actions { display: flex; gap: 10px; margin-left: auto; }
-@media (max-width: 767.98px) {
-  .brandbar { flex-wrap: wrap; }
-  .search-pill { order: 3; flex-basis: 100%; max-width: none; }
-  .brand small { display: none; }
+@media (min-width: 992px) { .mainnav + .bar-actions { margin-left: 0; } }
+.round-btn[aria-expanded="true"] { background: var(--brand); color: var(--brand-on); }
+
+/* search opens under the bar */
+.search-panel { padding: 0 0 14px; }
+.search-panel:not([hidden]) { animation: rise .3s cubic-bezier(.22, 1, .36, 1) both; }
+.search-pill { max-width: 640px; margin: 0 auto; display: flex; align-items: center; gap: 8px; background: var(--card);
+  border-radius: 999px; padding: 4px 4px 4px 16px; box-shadow: var(--shadow); border: 1px solid var(--line); }
+.search-pill:focus-within { border-color: var(--brand); }
+.search-pill > .ms { color: var(--muted); }
+.search-pill input { flex: 1; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 15px; padding: 9px 0; min-width: 0; }
+.search-pill input::placeholder { color: var(--muted); }
+.search-pill button { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--brand); color: var(--brand-on); display: grid; place-items: center; flex: none; }
+
+@media (max-width: 575.98px) {
+  .navrow { gap: 8px; min-height: 64px; }
+  .brand strong { font-size: 17px; }
+  .bar-actions { gap: 6px; }
+  .bar-actions [data-theme-toggle] { display: none; }  /* theme switch lives in the menu on phones */
 }
 
-/* header menu: shop sections */
-.mainnav { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; margin: -4px 0 0; padding: 0 0 10px; }
-.mainnav::-webkit-scrollbar { display: none; }
-.mainnav a { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px;
-  color: var(--ink); font-weight: 600; font-size: 14px; text-decoration: none; transition: background-color .2s ease, color .2s ease; }
-.mainnav a .ms { color: var(--muted); transition: color .2s ease; }
-.mainnav a:hover { background: var(--card); color: var(--brand); }
-.mainnav a:hover .ms { color: var(--brand); }
-.mainnav a.active { background: var(--brand); color: var(--brand-on); }
-.mainnav a.active .ms { color: inherit; }
-.mainnav a.deal:not(.active) { color: var(--coral); }
-.mainnav a.deal:not(.active) .ms { color: var(--coral); }
-.mainnav a:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+/* phone menu (slides in from the left) */
+.site-menu { --bs-offcanvas-width: min(86vw, 340px); --bs-offcanvas-bg: var(--page); --bs-offcanvas-color: var(--ink); border-right: 0 !important; }
+.site-menu .offcanvas-header { padding: 16px 18px; border-bottom: 1px solid var(--line); justify-content: space-between; gap: 12px; }
+.site-menu .offcanvas-body { padding: 14px 14px 24px; display: flex; flex-direction: column; gap: 16px; }
+.menu-list { display: grid; gap: 4px; }
+.menu-list a { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 16px; color: var(--ink);
+  font-weight: 600; font-size: 16px; text-decoration: none; transition: background-color .2s ease; }
+.menu-list .mi { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--card); color: var(--brand); box-shadow: var(--shadow); }
+.menu-list .chev { margin-left: auto; color: var(--muted); }
+.menu-list a:hover { background: var(--card); }
+.menu-list a.active { background: var(--brand-tint); color: var(--brand-dark); }
+html.dark .menu-list a.active { color: var(--brand); }
+.menu-list a.deal .mi { color: var(--coral); }
+.menu-list a.active .mi { background: var(--brand); color: var(--brand-on); }
+.menu-cart { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-radius: 16px; background: var(--card); box-shadow: var(--shadow);
+  color: var(--ink); font-weight: 600; text-decoration: none; }
+.menu-cart .ms { color: var(--brand); }
+.menu-cart span:last-child { margin-left: auto; color: var(--muted); font-weight: 500; font-size: 13.5px; }
+.menu-perks { list-style: none; margin: auto 0 0; padding: 14px 6px 0; border-top: 1px solid var(--line); display: grid; gap: 10px; font-size: 13.5px; color: var(--muted); }
+.menu-perks li { display: flex; align-items: center; gap: 8px; }
+.menu-perks .ms { color: var(--brand); }
+.menu-theme { display: flex; align-items: center; justify-content: space-between; padding: 0 6px; font-weight: 600; }
 
 /* category pills (MA: Series Chips) */
 .pills { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 10px; scrollbar-width: none; }
@@ -251,7 +291,7 @@ html.dark .brand strong { color: var(--brand); }
 @media (max-width: 991.98px) {
   .shop-layout { grid-template-columns: 1fr; gap: 0; }
   .filter-card { top: 0; }
-  .filter-card.offcanvas-lg { background: var(--card); color: var(--ink); }
+  .filter-card.offcanvas-lg { position: fixed; --bs-offcanvas-width: min(86vw, 340px); background: var(--card); color: var(--ink); }  /* slide-in panel, not in the page flow */
 }
 
 /* product card (MA: Product Card) */

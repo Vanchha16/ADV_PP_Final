@@ -321,8 +321,15 @@ def test_pad_crop_keeps_whole_wide_photo():
 
 def test_header_menu_marks_current_section(client):
     html = client.get("/").get_data(as_text=True)
-    assert 'class="mainnav"' in html and "Under $100" in html
+    assert 'class="mainnav"' in html and 'id="site-menu"' in html and "Under $100" in html
+    assert 'id="site-search" hidden' in html  # search starts closed
     html = client.get("/?category=Running").get_data(as_text=True)
-    assert 'href="/?category=Running" class="active"' in html
+    assert html.count('href="/?category=Running" class="active"') == 2  # desktop menu + phone menu
     html = client.get("/?max=100").get_data(as_text=True)
     assert 'class="active deal"' in html
+
+
+def test_header_search_open_on_results(client):
+    html = client.get("/?q=jordan").get_data(as_text=True)
+    assert 'id="site-search" hidden' not in html
+    assert 'aria-expanded="true"' in html and 'value="jordan"' in html

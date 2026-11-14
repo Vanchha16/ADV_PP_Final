@@ -175,11 +175,24 @@
     }
   });
 
-  /* ---------- header menu: on phones, scroll the current section into view ---------- */
-  const navActive = document.querySelector('.mainnav a.active');
-  if (navActive) {
-    const nav = navActive.parentElement;
-    nav.scrollLeft = navActive.offsetLeft - (nav.clientWidth - navActive.offsetWidth) / 2;
+  /* ---------- header search: the icon opens a search bar under the header ---------- */
+  const searchBtn = document.querySelector('[data-search-toggle]');
+  const searchPanel = searchBtn && document.getElementById(searchBtn.getAttribute('aria-controls'));
+  if (searchPanel) {
+    const searchIcon = searchBtn.querySelector('[data-search-icon]');
+    const setSearch = (open) => {
+      searchPanel.hidden = !open;
+      searchBtn.setAttribute('aria-expanded', String(open));
+      searchIcon.textContent = open ? 'close' : 'search';
+      if (open) searchPanel.querySelector('input')?.focus();
+    };
+    searchBtn.addEventListener('click', () => setSearch(searchPanel.hidden));
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !searchPanel.hidden) { setSearch(false); searchBtn.focus(); }
+      if (e.key === '/' && searchPanel.hidden && !/input|textarea|select/i.test(document.activeElement?.tagName || '')) {
+        e.preventDefault(); setSearch(true);
+      }
+    });
   }
 
   /* ---------- admin sidebar (slides in below 992px) ---------- */
