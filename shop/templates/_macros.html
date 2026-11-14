@@ -1,0 +1,36 @@
+{# Flash messages as toasts (MA: AppToast), shown bottom-centre and auto-dismissed. #}
+{% macro flashes() %}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  <div class="toast-stack" aria-live="polite">
+    {% for category, message in messages %}
+      <div class="toast-item {{ category }} alert" role="status" data-toast>
+        <span class="ms" aria-hidden="true">{{ {'success': 'check_circle', 'danger': 'error', 'warning': 'warning'}.get(category, 'info') }}</span>
+        <span>{{ message }}</span>
+        <button type="button" data-bs-dismiss="alert" aria-label="Close"><span class="ms ms-sm">close</span></button>
+      </div>
+    {% endfor %}
+  </div>
+  {% endwith %}
+{% endmacro %}
+
+{# Head shared by the store and the admin: fonts, icons, theme before first paint. #}
+{% macro head_assets() %}
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}">
+  <script>
+    (function () {
+      var m = 'system';
+      try { m = localStorage.getItem('aws_theme') || 'system'; } catch (e) {}
+      var dark = m === 'dark' || (m === 'system' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+      var r = document.documentElement;
+      r.classList.add('js');
+      if (dark) r.classList.add('dark');
+      r.setAttribute('data-theme-mode', m);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,400..600,1&display=block" rel="stylesheet">
+  <link href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+{% endmacro %}

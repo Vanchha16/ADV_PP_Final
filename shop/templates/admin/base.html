@@ -1,28 +1,61 @@
 {% extends "base.html" %}
 {% block body_class %}admin{% endblock %}
-{% block navbar %}
-<nav class="navbar navbar-expand-md admin-nav">
-  <div class="container">
-    <a class="navbar-brand brand text-white" href="{{ url_for('admin.products') }}">
-      <span class="brand-mark"><i class="bi bi-speedometer2"></i></span>{{ shop_name }} <small class="opacity-75 fw-normal">Admin</small>
+{% block layout %}
+{% if session.is_admin %}
+{% set ep = request.endpoint or "" %}
+{% set nav = [
+  ("admin.dashboard", "space_dashboard", "Dashboard", ep == "admin.dashboard", 0),
+  ("admin.orders", "receipt_long", "Orders", ep.startswith("admin.order"), sidebar_pending),
+  ("admin.products", "inventory_2", "Products", ep in ("admin.products", "admin.product_edit"), 0),
+  ("admin.product_new", "add_box", "Add product", ep == "admin.product_new", 0),
+] %}
+<div class="admin-shell">
+  <aside class="side" id="admin-sidebar" aria-label="Admin menu">
+    <a class="side-brand" href="{{ url_for('admin.dashboard') }}">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="">
+      <span><strong>Anime World</strong><small>Shop admin</small></span>
     </a>
-    {% if session.is_admin %}
-    <button class="navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#anav" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-    <div class="collapse navbar-collapse" id="anav">
-      <ul class="navbar-nav me-auto ms-md-4">
-        <li class="nav-item"><a class="nav-link {% if request.endpoint.startswith('admin.product') %}active{% endif %}" href="{{ url_for('admin.products') }}"><i class="bi bi-box-seam"></i> Products</a></li>
-        <li class="nav-item"><a class="nav-link {% if request.endpoint.startswith('admin.order') %}active{% endif %}" href="{{ url_for('admin.orders') }}"><i class="bi bi-receipt"></i> Orders</a></li>
-      </ul>
-      <div class="d-flex gap-2 align-items-center">
-        <a href="{{ url_for('public.index') }}" target="_blank" class="btn btn-sm btn-outline-light"><i class="bi bi-shop"></i> View store</a>
-        <form method="post" action="{{ url_for('admin.logout') }}">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <button class="btn btn-sm btn-light"><i class="bi bi-box-arrow-right"></i> Logout</button>
-        </form>
-      </div>
+    <nav class="side-nav">
+      {% for endpoint, ico, label, active, badge in nav %}
+      <a class="side-link {% if active %}active{% endif %}" href="{{ url_for(endpoint) }}" {% if active %}aria-current="page"{% endif %}>
+        {{ icon(ico) }}<span class="lbl">{{ label }}</span>
+        {% if badge %}<span class="side-badge" title="Awaiting payment">{{ badge }}</span>{% endif %}
+      </a>
+      {% endfor %}
+      <a class="side-link" href="{{ url_for('public.index') }}" target="_blank" rel="noopener">{{ icon("storefront") }}<span class="lbl">View store</span>{{ icon("open_in_new", "ms-sm") }}</a>
+    </nav>
+    <div class="theme-switch" role="radiogroup" aria-label="Theme" data-theme-switch>
+      <button type="button" role="radio" data-mode="light" title="Light">{{ icon("light_mode", "ms-sm") }}Light</button>
+      <button type="button" role="radio" data-mode="dark" title="Dark">{{ icon("dark_mode", "ms-sm") }}Dark</button>
+      <button type="button" role="radio" data-mode="system" title="System">{{ icon("contrast", "ms-sm") }}System</button>
     </div>
-    {% endif %}
+    <form method="post" action="{{ url_for('admin.logout') }}" class="user-card">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <span class="avatar">{{ config.ADMIN_USERNAME[:1]|upper }}</span>
+      <span class="who"><strong>{{ config.ADMIN_USERNAME }}</strong><small>Administrator</small></span>
+      <button class="logout-btn" title="Log out" aria-label="Log out">{{ icon("logout") }}</button>
+    </form>
+  </aside>
+  <div class="side-backdrop" data-sidebar-close></div>
+
+  <div class="admin-main">
+    <div class="admin-top">
+      <button class="round-btn" type="button" data-sidebar-toggle aria-controls="admin-sidebar" aria-label="Open menu">{{ icon("menu") }}</button>
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="">
+      <strong>{% block section %}Admin{% endblock %}</strong>
+    </div>
+    <main id="main" class="admin-content page-enter">
+      {% block content %}{% endblock %}
+    </main>
+    <footer class="admin-footer">
+      <span>© {{ current_year }} {{ shop_name }} admin</span>
+      <span>Payments: {% if config.PAYMENT_DEMO_MODE %}KHQR demo mode{% else %}Bakong live{% endif %}</span>
+    </footer>
   </div>
-</nav>
+</div>
+{% else %}
+<main id="main" class="admin-login page-enter">
+  {{ self.content() }}
+</main>
+{% endif %}
 {% endblock %}
-{% block footer %}{% endblock %}

@@ -1,36 +1,71 @@
 {% extends "admin/base.html" %}
 {% block title %}Products · Admin{% endblock %}
+{% block section %}Products{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-  <div><h1 class="page-title mb-0">Products</h1><small class="text-muted">{{ products|length }} total</small></div>
-  <a href="{{ url_for('admin.product_new') }}" class="btn btn-brand"><i class="bi bi-plus-lg"></i> Add New Product</a>
+<div class="page-head rise">
+  <div class="titles">
+    <h1>Products</h1>
+    <div class="sub">{{ active_count }} in the shop, {{ counts.all }} in total</div>
+  </div>
+  <form class="search-box" role="search">
+    {% if filter != "all" %}<input type="hidden" name="filter" value="{{ filter }}">{% endif %}
+    {{ icon("search") }}<input name="q" value="{{ q }}" placeholder="Name or category" aria-label="Search products" maxlength="100">
+  </form>
+  <a href="{{ url_for('admin.product_new') }}" class="btn btn-brand">{{ icon("add", "ms-sm") }} Add New Product</a>
 </div>
-<div class="panel p-0">
+
+<nav class="filter-chips" aria-label="Product filters">
+  {% for key, (label, _) in filters.items() %}
+  <a class="{% if key == filter %}active{% endif %}" href="{{ url_for('admin.products', filter=key if key != 'all' else None, q=q or None) }}">{{ label }}<span>{{ counts[key] }}</span></a>
+  {% endfor %}
+</nav>
+
+<section class="card-x" style="padding: 8px" data-reveal>
+  {% if products %}
   <div class="table-responsive">
-    <table class="table admin-table align-middle mb-0">
-      <thead><tr><th>ID</th><th>Product</th><th class="text-end">Price</th><th class="text-end">Stock</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+    <table class="data">
+      <thead><tr><th>ID</th><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
       <tbody>
       {% for p in products %}
-        <tr>
+        <tr class="{{ '' if p.is_active else 'dim' }}">
           <td class="text-muted">{{ p.id }}</td>
-          <td><div class="d-flex align-items-center gap-2"><img src="{{ p.image_src() }}" class="cart-thumb sm" alt=""><span class="fw-semibold">{{ p.name }}</span></div></td>
-          <td class="text-end">{{ p.price|money }}</td>
-          <td class="text-end {% if p.stock == 0 %}text-danger fw-semibold{% elif p.stock < 5 %}text-warning-emphasis{% endif %}">{{ p.stock }}</td>
-          <td>{% if p.is_active %}<span class="badge rounded-pill text-bg-success">Active</span>{% else %}<span class="badge rounded-pill text-bg-secondary">Inactive</span>{% endif %}</td>
-          <td class="text-end text-nowrap">
-            <a href="{{ url_for('admin.product_edit', product_id=p.id) }}" class="btn btn-sm btn-outline-dark"><i class="bi bi-pencil"></i> Edit</a>
-            <form method="post" action="{{ url_for('admin.product_delete', product_id=p.id) }}" class="d-inline"
-                  data-confirm="Delete “{{ p.name }}”? This cannot be undone." onsubmit="return confirm(this.dataset.confirm);">
+          <td>
+            <div class="d-flex align-items-center gap-3">
+              <img class="photo lg" src="{{ p.image_src() }}" alt="">
+              <div class="min-w-0 fw-semibold">{{ p.name }}</div>
+            </div>
+          </td>
+          <td class="text-muted">{{ p.category or "" }}</td>
+          <td class="fw-bold">{{ p.price|money }}</td>
+          <td><span class="chip {{ 'red' if p.stock == 0 else ('amber' if p.stock <= 3 else 'green') }}">{{ 'Sold out' if p.stock == 0 else p.stock ~ ' left' }}</span></td>
+          <td>
+            <form method="post" action="{{ url_for('admin.product_toggle', product_id=p.id) }}" class="d-flex align-items-center gap-2">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash3"></i> Delete</button>
+              <input type="hidden" name="next" value="{{ request.full_path }}">
+              <button class="switch {{ 'on' if p.is_active }}" role="switch" aria-checked="{{ 'true' if p.is_active else 'false' }}" aria-label="{{ p.name }} in the shop" title="{{ 'Hide from the shop' if p.is_active else 'Show in the shop' }}"></button>
+              <span class="small {{ '' if p.is_active else 'text-muted' }}">{{ p.status_label }}</span>
+            </form>
+          </td>
+          <td class="text-end text-nowrap">
+            <form method="post" action="{{ url_for('admin.product_restock', product_id=p.id) }}" class="d-inline">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="next" value="{{ request.full_path }}">
+              <button class="btn btn-tint btn-sm" title="Add 5 to stock">+5</button>
+            </form>
+            <a href="{{ url_for('admin.product_edit', product_id=p.id) }}" class="btn btn-line btn-sm">{{ icon("edit", "ms-sm") }} Edit</a>
+            <form method="post" action="{{ url_for('admin.product_delete', product_id=p.id) }}" class="d-inline"
+                  data-confirm="Delete “{{ p.name }}”? It disappears from the shop. Past orders keep their copy." data-confirm-ok="Delete">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-red-line btn-sm">{{ icon("delete", "ms-sm") }} Delete</button>
             </form>
           </td>
         </tr>
-      {% else %}
-        <tr><td colspan="6" class="text-center text-muted py-5">No products yet.</td></tr>
       {% endfor %}
       </tbody>
     </table>
   </div>
-</div>
+  {% else %}
+  <div class="empty">{{ icon("inventory_2") }}<p class="mb-0">No products here.</p></div>
+  {% endif %}
+</section>
 {% endblock %}

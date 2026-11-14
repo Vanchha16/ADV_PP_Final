@@ -50,3 +50,4 @@ class Config:
     PAYMENT_DEMO_MODE = _bool("PAYMENT_DEMO_MODE", default=not BAKONG_TOKEN)
 
     AUTO_SEED = _bool("AUTO_SEED", default=True)
+    SEED_DOWNLOAD_IMAGES = _bool("SEED_DOWNLOAD_IMAGES", default=True)

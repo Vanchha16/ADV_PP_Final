@@ -16,8 +16,13 @@ def process_upload(file_storage):
     name = (file_storage.filename or "").lower()
     if "." not in name or name.rsplit(".", 1)[1] not in ALLOWED_EXT:
         raise ImageError("Image must be PNG, JPG, WEBP or GIF.")
+    return process_stream(file_storage.stream)
+
+
+def process_stream(stream):
+    """Re-encode any image stream as a JPEG of at most MAX_SIDE px. Raises ImageError."""
     try:
-        img = Image.open(file_storage.stream)
+        img = Image.open(stream)
         img.load()
     except (UnidentifiedImageError, OSError):
         raise ImageError("That file is not a valid image.")

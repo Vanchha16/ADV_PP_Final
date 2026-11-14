@@ -1,69 +1,89 @@
+{% from "_macros.html" import flashes, head_assets with context %}
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{{ shop_name }}{% endblock %}</title>
-  {% block meta %}<meta name="description" content="{{ shop_name }} — anime figures, plush, manga and merch, paid with KHQR.">{% endblock %}
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
-  <link href="{{ url_for('static', filename='vendor/bootstrap-icons/bootstrap-icons.min.css') }}" rel="stylesheet">
-  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+  {% block meta %}<meta name="description" content="{{ shop_name }}: official anime figures, plush and manga delivered across Cambodia, paid with KHQR.">{% endblock %}
+  {{ head_assets() }}
 </head>
 <body class="{% block body_class %}{% endblock %}">
-{% block navbar %}
-<nav class="navbar navbar-expand-md site-nav sticky-top">
+<a class="skip-link" href="#main">Skip to content</a>
+{% block layout %}
+<header class="topbar" data-elevate>
   <div class="container">
-    <a class="navbar-brand brand" href="{{ url_for('public.index') }}">
-      <span class="brand-mark"><i class="bi bi-stars"></i></span>{{ shop_name }}
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="nav">
-      <form class="d-flex ms-md-4 my-2 my-md-0 flex-grow-1 search" action="{{ url_for('public.index') }}" role="search">
-        <i class="bi bi-search"></i>
-        <input class="form-control" type="search" name="q" placeholder="Search products…" value="{{ q or '' }}" aria-label="Search">
+    <div class="brandbar">
+      <a class="brand" href="{{ url_for('public.index') }}">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="" width="40" height="40">
+        <span><strong>Anime World</strong><small>Hi there! Find your next favourite.</small></span>
+      </a>
+      <form class="search-pill" action="{{ url_for('public.index') }}" role="search">
+        {{ icon("search") }}
+        <input type="search" name="q" value="{{ q or '' }}" placeholder="Search figures, plush, manga…" aria-label="Search products" maxlength="100">
+        <button aria-label="Search">{{ icon("arrow_forward") }}</button>
       </form>
-      <ul class="navbar-nav ms-auto align-items-md-center gap-md-2">
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('public.index') }}">Shop</a></li>
-        <li class="nav-item">
-          <a class="nav-link cart-link" href="{{ url_for('public.view_cart') }}">
-            <i class="bi bi-cart3"></i> Cart
-            {% if cart_count %}<span class="badge rounded-pill cart-badge">{{ cart_count }}</span>{% endif %}
-          </a>
-        </li>
-      </ul>
+      <div class="bar-actions">
+        <button type="button" class="round-btn" data-theme-toggle aria-label="Switch light or dark theme" title="Light or dark theme">
+          <span class="ms" data-theme-icon aria-hidden="true">dark_mode</span>
+        </button>
+        <a class="round-btn" href="{{ url_for('public.view_cart') }}" aria-label="Cart, {{ cart_count }} items" title="Cart">
+          {{ icon("shopping_bag") }}
+          {% if cart_count %}<span class="count-badge">{{ cart_count }}</span>{% endif %}
+        </a>
+      </div>
     </div>
   </div>
-</nav>
-{% endblock %}
+</header>
 
-<main class="{% block main_class %}py-4 py-md-5{% endblock %}">
+<main id="main" class="{% block main_class %}pb-4{% endblock %} page-enter">
   <div class="container">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-      {% endfor %}
-    {% endwith %}
     {% block content %}{% endblock %}
   </div>
 </main>
 
-{% block footer %}
 <footer class="site-footer">
-  <div class="container d-flex flex-column flex-md-row justify-content-between gap-2">
-    <span>© {{ current_year }} {{ shop_name }}. Anime merch shipped across Cambodia 🇰🇭</span>
-    <span class="d-flex align-items-center gap-2">We accept <span class="khqr-pill">KHQR</span> via Bakong &amp; all Cambodian banks</span>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a class="brand" href="{{ url_for('public.index') }}">
+          <img src="{{ url_for('static', filename='img/logo.png') }}" alt="" width="40" height="40">
+          <span><strong>Anime World</strong></span>
+        </a>
+        <p class="mt-2 mb-0" style="max-width: 34ch">Official anime figures, plush and manga, delivered across Cambodia.</p>
+      </div>
+      <div>
+        <h2>Shop</h2>
+        <ul>
+          <li><a href="{{ url_for('public.index') }}">All products</a></li>
+          {% for c in nav_categories %}<li><a href="{{ url_for('public.index', category=c) }}#products">{{ c }}</a></li>{% endfor %}
+        </ul>
+      </div>
+      <div>
+        <h2>Your order</h2>
+        <ul>
+          <li><a href="{{ url_for('public.view_cart') }}">Cart</a></li>
+          <li><a href="{{ url_for('public.checkout') }}">Checkout</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>We accept</h2>
+        <div class="pay-logos">
+          <img src="{{ url_for('static', filename='img/pay-bakong.png') }}" alt="Bakong">
+          <span><span class="khqr-pill">KHQR</span> by Bakong<br>ABA, ACLEDA, Wing and every banking app</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© {{ current_year }} {{ shop_name }}</span>
+      <span>Phnom Penh, Cambodia</span>
+    </div>
   </div>
 </footer>
 {% endblock %}
+{{ flashes() }}
 <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/motion.js') }}"></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>
