@@ -77,7 +77,7 @@ ADV_PP_Final/
 └── docs/screenshots/            # images used in this README
 ```
 
-**How a purchase flows through the code:** `views/public.py` lists products from `models.py` → the cart is kept in the session by `cart.py` → checkout creates an `Order` → `payments.py` makes the KHQR and checks Bakong every few seconds → when paid, stock is reduced and the confirmation page is shown. The admin side (`views/admin.py`) reads the same models.
+**How a purchase flows through the code:** `views/public.py` lists products from `models.py`, then the cart is kept in the session by `cart.py`, checkout creates an `Order`, `payments.py` makes the KHQR and checks Bakong every few seconds, and when paid, stock is reduced and the confirmation page is shown. The admin side (`views/admin.py`) reads the same models.
 
 ## Run locally
 ```bash
@@ -133,7 +133,7 @@ Photos from `image_url` are downloaded, resized and stored in the database. If a
 
 ### Option A: Render (free, PostgreSQL included)
 1. Push this repo to GitHub.
-2. On https://render.com choose **New + → Blueprint** and select the repo (it reads `render.yaml`).
+2. On https://render.com choose **New +**, then **Blueprint**, and select the repo (it reads `render.yaml`).
 3. Fill in the prompted secrets: `ADMIN_PASSWORD`, and optionally `BAKONG_ACCOUNT_ID`, `BAKONG_TOKEN`, `BAKONG_PROXY_KEY`.
 4. Your live URL is `https://<service-name>.onrender.com` and the admin is at `/admin`.
 
@@ -141,13 +141,13 @@ Photos from `image_url` are downloaded, resized and stored in the database. If a
 
 ### Option B: PythonAnywhere (free, SQLite persists)
 1. In a Bash console: `git clone <repo>`, then `cd anime-world-shop`, then `pip install --user -r requirements.txt`.
-2. Web tab → *Add a new web app* → Manual config (Python 3.12) → edit the WSGI file:
+2. In the Web tab, choose *Add a new web app*, then Manual config (Python 3.12), then edit the WSGI file:
    ```python
    import sys; sys.path.insert(0, "/home/<you>/anime-world-shop")
    from wsgi import app as application
    ```
 3. Create `/home/<you>/anime-world-shop/.env` (copy `.env.example`), then reload.
-4. Static files mapping: URL `/static/` → `/home/<you>/anime-world-shop/shop/static`.
+4. Static files mapping: URL `/static/` to directory `/home/<you>/anime-world-shop/shop/static`.
 
 ## Security notes
 - CSRF token on every form; admin password compared in constant time; session cookie is HttpOnly + SameSite.

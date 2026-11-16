@@ -1,22 +1,25 @@
+{% set detail_url = url_for('public.product_detail', product_id=p.id) %}
 <div class="col" data-reveal data-reveal-index="{{ reveal_index or 0 }}">
-  <article class="pcard">
-    <div class="pcard-photo">
-      <img src="{{ p.image_src() }}" alt="" loading="lazy">
-      {% if not p.in_stock %}<div class="soldout"><span>Sold out</span></div>{% endif %}
-      {% if p.category %}<span class="ptag series">{{ p.category }}</span>{% endif %}
-    </div>
+  <article class="pcard {{ 'is-soldout' if not p.in_stock }}">
+    <a class="pcard-photo" href="{{ detail_url }}" tabindex="-1" aria-hidden="true">
+      <img src="{{ p.image_src() }}" alt="" loading="lazy" width="864" height="864">
+    </a>
     <div class="pcard-body">
-      <div class="pcard-meta">{% if not p.in_stock %}Sold out{% elif p.stock <= 3 %}<span style="color: var(--coral); font-weight: 700">Only {{ p.stock }} left</span>{% else %}In stock{% endif %}</div>
-      <h3 class="pcard-name"><a href="{{ url_for('public.product_detail', product_id=p.id) }}">{{ p.name }}</a></h3>
-      <div class="pcard-foot">
+      <h3 class="pcard-name"><a href="{{ detail_url }}">{{ p.name }}</a></h3>
+      <p class="pcard-desc">{{ p.short_description }}</p>
+      <div class="pcard-price">
         <span class="price">{{ p.price|money }}</span>
-        <a href="{{ url_for('public.product_detail', product_id=p.id) }}" class="details-link" aria-label="View details of {{ p.name }}">View Details</a>
+        {% if not p.in_stock %}<span class="pcard-flag">Sold out</span>
+        {% elif p.stock <= 3 %}<span class="pcard-flag low">Only {{ p.stock }} left</span>{% endif %}
+      </div>
+      <div class="pcard-actions">
+        <a href="{{ detail_url }}" class="btn btn-line btn-sm" aria-label="View details of {{ p.name }}">View details</a>
         <form method="post" action="{{ url_for('public.cart_add') }}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="hidden" name="product_id" value="{{ p.id }}">
           <input type="hidden" name="quantity" value="1">
           <input type="hidden" name="next" value="{{ request.full_path }}">
-          <button class="add-round" {% if not p.in_stock %}disabled{% endif %} aria-label="Add {{ p.name }} to cart" title="{{ 'Add to Cart' if p.in_stock else 'Sold out' }}">{{ icon("add") }}</button>
+          <button class="btn btn-brand btn-sm add-btn" {% if not p.in_stock %}disabled{% endif %} aria-label="Add {{ p.name }} to cart">{{ icon("add_shopping_cart", "ms-sm") }}<span>Add to cart</span></button>
         </form>
       </div>
     </div>

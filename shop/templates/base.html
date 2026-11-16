@@ -21,15 +21,6 @@
   ("Running", "directions_run", url_for('public.index', category='Running'), cur_cat == 'Running'),
   ("Under $100", "sell", url_for('public.index', max=100), not cur_cat and cur_max == '100'),
 ] %}
-<div class="announce">
-  <div class="container">
-    <p class="announce-inner">
-      <span>{{ icon("local_shipping", "ms-sm") }} Free delivery in Cambodia</span>
-      <span>{{ icon("qr_code_2", "ms-sm") }} Pay with KHQR</span>
-      <span class="d-none d-md-inline-flex">{{ icon("verified", "ms-sm") }} 100% authentic sneakers</span>
-    </p>
-  </div>
-</div>
 <header class="topbar" data-elevate>
   <div class="container">
     <div class="navrow">

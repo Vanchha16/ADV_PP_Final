@@ -116,7 +116,7 @@
     if (!btn) return;
     btn.classList.add('is-busy');
     const ico = btn.querySelector('.ms');
-    if (ico && btn.classList.contains('add-round')) ico.textContent = 'check';
+    if (ico && btn.classList.contains('add-btn')) ico.textContent = 'check';
   }));
 
   /* ---------- copy product link ---------- */

@@ -62,7 +62,7 @@
   <h2 class="home-h" id="brands-title">Shop by brand</h2>
   <ul class="brand-list">
     {% for b, n in brands %}
-    <li><a href="{{ shop_url(brand=b) }}">{{ b }}<sup aria-label="{{ n }} pair{{ '' if n == 1 else 's' }}">{{ n }}</sup></a></li>
+    <li><a href="{{ shop_url(brand=b) }}">{{ b }} <span class="n">{{ n }} pair{{ '' if n == 1 else 's' }}</span></a></li>
     {% endfor %}
   </ul>
 </section>
