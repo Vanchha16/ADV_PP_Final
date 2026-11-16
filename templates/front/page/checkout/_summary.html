@@ -1,0 +1,15 @@
+<div class="receipt">
+  <h2 class="h6 fw-bold mb-2">{{ summary_title or "Your order" }}</h2>
+  <ul class="mini-items">
+    {% for l in items %}
+    <li>
+      {% if l.image %}<img src="{{ l.image }}" alt="">{% endif %}
+      <span class="nm">{{ l.name }} <span class="text-muted">× {{ l.quantity }}</span></span>
+      <strong>{{ l.subtotal|money }}</strong>
+    </li>
+    {% endfor %}
+  </ul>
+  <div class="dash"></div>
+  <div class="row-line"><span>Delivery</span><span class="fw-bold" style="color: var(--success)">Free</span></div>
+  <div class="row-line total"><span>Total</span><span>{{ total|money }}</span></div>
+</div>

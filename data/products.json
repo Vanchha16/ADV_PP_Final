@@ -1,0 +1,215 @@
+{
+  "_about": "Real sneakers researched online in November 2026. Price is the US retail price listed on the StockX product page (source); stock numbers are demo values. image_url is the StockX product photo; the importer downloads it. crop 'pad' places the wide shoe photo on a white square so the whole shoe shows on the product card.",
+  "products": [
+    {
+      "name": "Air Jordan 4 Retro Military Black",
+      "category": "Basketball",
+      "label": "Jordan 4",
+      "price": 210,
+      "stock": 5,
+      "description": "Jordan Brand took the colour blocking of the original Military Blue and redid it in black. White leather upper, light grey toe wrap, black eyelets and a visible Air unit in the heel.\n\nStyle: DH6927-111\nColourway: White/Military Black-Neutral Grey\nReleased: May 2022\nUS retail price: $210.",
+      "source": "https://stockx.com/air-jordan-4-retro-military-black",
+      "image_url": "https://images.stockx.com/images/Air-Jordan-4-Retro-Military-Black-Product.jpg",
+      "crop": "pad"
+    },
+    {
+      "name": "Air Jordan 1 Retro High OG Chicago Lost and Found",
+      "category": "Basketball",
+      "label": "Jordan 1",
+      "price": 180,
+      "stock": 0,
+      "description": "The 1985 Chicago colourway made to look like a pair found in an old stockroom: cracked red leather, a sail midsole and a vintage-style box.\n\nStyle: DZ5485-612\nColourway: Varsity Red/Black-Sail-Muslin\nReleased: November 2022\nUS retail price: $180.",
+      "source": "https://stockx.com/air-jordan-1-retro-high-og-chicago-reimagined-lost-and-found",
+      "image_url": "https://images.stockx.com/images/Air-Jordan-1-Retro-High-OG-Chicago-Reimagined-Product.jpg",
+      "crop": "pad"
+    },
+    {
+      "name": "Air Jordan 3 Retro White Cement Reimagined",
+      "category": "Basketball",
+      "label": "Jordan 3",
+      "price": 210,
+      "stock": 4,
+      "description": "Part of the Reimagined series: the 1988 Air Jordan 3 rebuilt to the original shape, with white tumbled leather, elephant print overlays and an aged off-white midsole.\n\nStyle: DN3707-100\nColourway: Summit White/Fire Red/Black/Cement Grey\nReleased: March 2023\nUS retail price: $210.",
+      "source": "https://stockx.com/air-jordan-3-retro-white-cement-reimagined",
+      "image_url": "https://images.stockx.com/images/Air-Jordan-3-Retro-White-Cement-Reimagined-Product.jpg",
+      "crop": "pad"
+    },
+    {
+      "name": "Nike Dunk Low Retro White Black Panda",
+      "category": "Lifestyle",
+      "label": "Dunk",
+      "price": 115,
+      "stock": 18,
+      "description": "The 'Panda' Dunk: white leather base with black overlays and Swooshes, a nylon tongue with classic Nike branding and a black rubber outsole.\n\nStyle: DD1391-100\nColourway: White/Black\nReleased: March 2021\nUS retail price: $115.",
+      "source": "https://stockx.com/nike-dunk-low-retro-white-black-2021",
+      "image_url": "https://images.stockx.com/images/Nike-Dunk-Low-Retro-White-Black-2021-Product.jpg",
+      "crop": "pad"
+    },
+    {
+      "name": "Nike Air Force 1 Low '07 White",
+      "category": "Lifestyle",
+      "label": "AF1",
+      "price": 115,
+      "stock": 24,
+      "description": "The all-white Air Force 1. Crisp leather upper, perforated toe and Nike Air cushioning in a thick cupsole. It goes with everything.\n\nStyle: CW2288-111\nColourway: White/White\nReleased: Always in stock\nUS retail price: $115.",
+      "source": "https://stockx.com/nike-air-force-1-low-white-07",
+      "image_url": "https://images.stockx.com/360/Nike-Air-Force-1-Low-White-07/Images/Nike-Air-Force-1-Low-White-07/Lv2/img01.jpg?w=1400&q=90",
+      "crop": "pad"
+    },
+    {
+      "name": "Nike Dunk Low Grey Fog",
+      "category": "Lifestyle",
+      "label": "Dunk",
+      "price": 115,
+      "stock": 9,
+      "description": "A softer take on the Panda: white leather upper with Grey Fog overlays and Swooshes on a white and grey sole.\n\nStyle: DD1391-103\nColourway: White/Grey Fog\nReleased: September 2021\nUS retail price: $115.",
+      "source": "https://stockx.com/nike-dunk-low-grey-fog",
+      "image_url": "https://images.stockx.com/images/Nike-Dunk-Low-Grey-Fog-Product.jpg",
+      "crop": "pad"
+    },
+    {
+      "name": "adidas Samba OG Cloud White Core Black",
+      "category": "Lifestyle",
+      "label": "Samba",
+      "price": 100,
+      "stock": 15,
+      "description": "The indoor football shoe that became a street favourite. Full-grain leather upper, grey suede T-toe, black Three Stripes and a gum sole.\n\nStyle: B75806\nColourway: Cloud White/Core Black/Clear Granite\nReleased: Core colourway\nUS retail price: $100.",
+      "source": "https://stockx.com/adidas-samba-og-cloud-white-core-black",
+      "image_url": "https://images.stockx.com/images/adidas-Samba-OG-Cloud-White-Core-Black-Product.jpg",
+      "crop": "pad"
+    },
+    {
+      "name": "adidas Campus 00s Core Black",
+      "category": "Lifestyle",
+      "label": "Campus",
+      "price": 110,
+      "stock": 7,
+      "description": "A chunkier, skate-inspired Campus: black suede upper, white leather stripes, a thick white midsole and a gum outsole.\n\nStyle: HQ8708\nColourway: Core Black/Footwear White/Off White\nReleased: February 2023\nUS retail price: $110.",
+      "source": "https://stockx.com/adidas-campus-00s-core-black",
+      "image_url": "https://images.stockx.com/images/adidas-Campus-00s-Core-Black-Product.jpg",
+      "crop": "pad"
+    },
+    {
+      "name": "New Balance 550 White Green",
+      "category": "Lifestyle",
+      "label": "NB 550",
+      "price": 120,
+      "stock": 6,
+      "description": "The 1989 basketball shoe brought back for the street. Smooth white leather upper, grey suede toe wrap and green details on the N, heel and sole.\n\nStyle: BB550WT1\nColourway: White/Green\nReleased: June 2021\nUS retail price: $120.",
+      "source": "https://stockx.com/new-balance-550-white-green",
+      "image_url": "https://images.stockx.com/images/New-Balance-550-White-Green-Product.jpg",
+      "crop": "pad"
+    },
+    {
+      "name": "New Balance 530 White Silver Navy",
+      "category": "Lifestyle",
+      "label": "NB 530",
+      "price": 95,
+      "stock": 3,
+      "active": false,
+      "description": "A 90s running shoe with a white mesh upper, metallic silver overlays and a navy-outlined N on an ABZORB sole. Restock on the way, so it stays hidden from the store until it arrives.\n\nStyle: MR530SG\nColourway: White/Silver/Navy\nReleased: February 2021\nUS retail price: $95.",
+      "source": "https://stockx.com/new-balance-530-white-silver-navy",
+      "image_url": "https://images.stockx.com/images/New-Balance-530-White-Silver-Navy-Product.jpg",
+      "crop": "pad"
+    },
+    {
+      "name": "Converse Chuck 70 Hi Black",
+      "category": "Lifestyle",
+      "label": "Chuck 70",
+      "price": 85,
+      "stock": 14,
+      "description": "The premium Chuck Taylor: heavier double-ply canvas, a glossy egret midsole, vintage heel label and extra cushioning in the insole.\n\nStyle: 162050C\nColourway: Black/Black-Egret\nReleased: Core colourway\nUS retail price: $85.",
+      "source": "https://stockx.com/converse-chuck-taylor-all-star-70s-hi-black",
+      "image_url": "https://images.stockx.com/images/Converse-Chuck-Taylor-All-Star-70s-Hi-Black-Product.jpg",
+      "crop": "pad"
+    },
+    {
+      "name": "Onitsuka Tiger Mexico 66 Yellow Black",
+      "category": "Lifestyle",
+      "label": "Mexico 66",
+      "price": 120,
+      "stock": 8,
+      "description": "The famous yellow and black colourway worn in the film Kill Bill. Slim leather upper with the Onitsuka Tiger stripes and a thin rubber sole.\n\nStyle: 1183C102-751\nColourway: Yellow/Black\nReleased: January 2022\nUS retail price: $120.",
+      "source": "https://stockx.com/onitsuka-tiger-mexico-66-kill-bill-2022",
+      "image_url": "https://images.stockx.com/images/Onitsuka-Tiger-Mexico-66-Kill-Bill-2022-Product.jpg",
+      "crop": "pad"
+    },
+    {
+      "name": "Vans Old Skool Black White",
+      "category": "Lifestyle",
+      "label": "Old Skool",
+      "price": 70,
+      "stock": 20,
+      "description": "The classic skate shoe: black canvas and suede upper with the white leather side stripe, padded collar and waffle rubber sole.\n\nStyle: VN000D3HY28\nColourway: Black/True White\nReleased: Core colourway\nUS retail price: $70.",
+      "source": "https://stockx.com/vans-old-skool-black-white",
+      "image_url": "https://images.stockx.com/images/Vans-Old-Skool-Black-White-Product.jpg",
+      "crop": "pad"
+    },
+    {
+      "name": "New Balance 9060 Rain Cloud Grey",
+      "category": "Running",
+      "label": "NB 9060",
+      "price": 150,
+      "stock": 10,
+      "description": "A chunky Y2K runner with a suede and mesh upper in grey tones, and a sculpted midsole that mixes SBS and ABZORB cushioning.\n\nStyle: U9060GRY\nColourway: Rain Cloud/Castlerock\nReleased: September 2022\nUS retail price: $150.",
+      "source": "https://stockx.com/new-balance-9060-rain-cloud-grey",
+      "image_url": "https://images.stockx.com/images/New-Balance-9060-Rain-Cloud-Grey-Product.jpg",
+      "crop": "pad"
+    },
+    {
+      "name": "ASICS Gel-Kayano 14 White Pure Silver",
+      "category": "Running",
+      "label": "Kayano 14",
+      "price": 150,
+      "stock": 6,
+      "description": "The 2008 running shoe back in white and metallic silver. Breathable mesh upper, GEL cushioning in the heel and forefoot and a grippy rubber outsole.\n\nStyle: 1201A019-104\nColourway: White/Pure Silver\nReleased: April 2022\nUS retail price: $150.",
+      "source": "https://stockx.com/asics-gel-kayano-14-white-pure-silver",
+      "image_url": "https://images.stockx.com/images/ASICS-Gel-Kayano-14-White-Pure-Silver-Product.jpg",
+      "crop": "pad"
+    },
+    {
+      "name": "ASICS Gel-1130 White Clay Canyon",
+      "category": "Running",
+      "label": "Gel-1130",
+      "price": 95,
+      "stock": 11,
+      "description": "A late-2000s runner with synthetic leather and mesh panels, GEL cushioning and earthy clay accents. Easy to wear every day.\n\nStyle: 1201A256-113\nColourway: White/Clay Canyon\nReleased: July 2023\nUS retail price: $95.",
+      "source": "https://stockx.com/asics-gel-1130-white-clay-canyon",
+      "image_url": "https://images.stockx.com/images/ASICS-Gel-1130-White-Clay-Canyon-Product.jpg",
+      "crop": "pad"
+    },
+    {
+      "name": "HOKA Clifton 9 Black White",
+      "category": "Running",
+      "label": "Clifton 9",
+      "price": 145,
+      "stock": 9,
+      "description": "A light, soft daily trainer. Engineered knit upper, thick compression-moulded foam and an extended heel for smooth landings.\n\nStyle: 1127895-BWHT\nColourway: Black/White\nReleased: February 2023\nUS retail price: $145.",
+      "source": "https://stockx.com/hoka-one-one-clifton-9-black-white",
+      "image_url": "https://images.stockx.com/images/Hoka-One-One-Clifton-9-Black-White-Product.jpg",
+      "crop": "pad"
+    },
+    {
+      "name": "Salomon XT-6 Triple Black",
+      "category": "Running",
+      "label": "XT-6",
+      "price": 190,
+      "stock": 2,
+      "description": "A trail runner that crossed over to the street. Quicklace system, tough breathable upper, EnergyCell+ cushioning and a Contagrip outsole for grip on any ground.\n\nStyle: L41086600\nColourway: Black/Black/Phantom\nReleased: April 2020\nUS retail price: $190.",
+      "source": "https://stockx.com/salomon-s-lab-xt-6-adv-triple-black",
+      "image_url": "https://images.stockx.com/images/Salomon-S-Lab-XT-6-Adv-Triple-Black-Product.jpg",
+      "crop": "pad"
+    },
+    {
+      "name": "Nike Air Max 90 Triple White",
+      "category": "Running",
+      "label": "Air Max 90",
+      "price": 130,
+      "stock": 12,
+      "description": "The 1990 runner in all white: leather and mesh upper, visible Max Air units in the heel and a waffle outsole.\n\nStyle: CZ5594-100\nColourway: White/White-White\nReleased: July 2020\nUS retail price: $130.",
+      "source": "https://stockx.com/nike-air-max-90-leather-triple-white-2020",
+      "image_url": "https://images.stockx.com/images/Nike-Air-Max-90-Leather-Triple-White-2020-Product.jpg",
+      "crop": "pad"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{% extends "front/layout/base.html" %}
+{% block title %}Your cart · {{ shop_name }}{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center gap-2 mb-3">
+  <h1 class="h3 fw-bold mb-0">Shopping cart</h1>
+  {% if lines %}<span class="chip">{{ lines|sum(attribute='quantity') }} items</span>{% endif %}
+</div>
+{% if lines %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <form method="post" action="{{ url_for('cart.update') }}" id="cart-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% for l in lines %}
+      <div class="cart-item" data-reveal data-reveal-index="{{ loop.index0 }}">
+        <img src="{{ l.product.image_src() }}" alt="">
+        <div class="flex-grow-1 min-w-0">
+          <a href="{{ url_for('catalog.product_detail', product_id=l.product.id) }}" class="name d-block">{{ l.product.name }}</a>
+          <div class="text-muted small mt-1">Unit price {{ l.product.price|money }}</div>
+          {% if l.over_stock %}<div class="small fw-bold" style="color: var(--danger)">Only {{ l.product.stock }} in stock</div>{% endif %}
+          <div class="d-flex align-items-center gap-3 mt-2 flex-wrap">
+            <div class="stepper" role="group" aria-label="Quantity for {{ l.product.name }}">
+              <button type="button" data-step="-1" aria-label="Decrease">{{ icon("remove", "ms-sm") }}</button>
+              <input type="number" name="qty_{{ l.product.id }}" value="{{ l.quantity }}" min="0" max="{{ l.product.stock }}" aria-label="Quantity for {{ l.product.name }}" data-autosubmit-delay>
+              <button type="button" data-step="1" aria-label="Increase">{{ icon("add", "ms-sm") }}</button>
+            </div>
+            <span class="text-muted small">Subtotal</span>
+            <strong class="price">{{ l.subtotal|money }}</strong>
+          </div>
+        </div>
+        <button class="icon-del" formaction="{{ url_for('cart.remove', product_id=l.product.id) }}" title="Remove {{ l.product.name }}" aria-label="Remove {{ l.product.name }}" data-confirm="Remove {{ l.product.name }} from your cart?" data-confirm-ok="Remove">{{ icon("delete") }}</button>
+      </div>
+      {% endfor %}
+      <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+        <a href="{{ url_for('catalog.index') }}" class="btn btn-link">{{ icon("arrow_back", "ms-sm") }} Continue shopping</a>
+        <button class="btn btn-line">{{ icon("sync", "ms-sm") }} Update cart</button>
+      </div>
+    </form>
+  </div>
+  <div class="col-lg-4">
+    <div class="receipt sticky-col rise">
+      <h2 class="h5 fw-bold mb-3">Order summary</h2>
+      {% for l in lines %}
+      <div class="row-line"><span>{{ l.product.name }} × {{ l.quantity }}</span><span>{{ l.subtotal|money }}</span></div>
+      {% endfor %}
+      <div class="dash"></div>
+      <div class="row-line"><span>Subtotal</span><span>{{ total|money }}</span></div>
+      <div class="row-line"><span>Delivery</span><span class="fw-bold" style="color: var(--success)">Free</span></div>
+      <div class="dash"></div>
+      <div class="row-line total"><span>Total</span><span>{{ total|money }}</span></div>
+      <a href="{{ url_for('checkout.index') }}" class="btn btn-brand btn-lg w-100 mt-3">Proceed to Checkout</a>
+      <p class="small text-muted text-center mt-3 mb-0">You pay on the next step by scanning a <span class="khqr-pill">KHQR</span> code.</p>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="empty card-x">
+  {{ icon("shopping_bag") }}
+  <h2>Your cart is empty</h2>
+  <p>Add a pair of sneakers and it will show up here.</p>
+  <a href="{{ url_for('catalog.index') }}" class="btn btn-brand">Browse products</a>
+</div>
+{% endif %}
+{% endblock %}

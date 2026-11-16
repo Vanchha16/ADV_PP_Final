@@ -1,0 +1,115 @@
+{% extends "front/layout/base.html" %}
+{% macro stock_text(p) -%}
+  {%- if not p.in_stock %}Sold out{% elif p.stock <= 3 %}Only {{ p.stock }} left{% else %}In stock{% endif -%}
+{%- endmacro %}
+{% block content %}
+
+{% if not filtered and featured %}
+{% set f = featured[0] %}
+<section class="stage" aria-labelledby="stage-name" data-stage>
+  <div class="stage-copy">
+    <p class="stage-brand" data-f="brand">{{ brand_of(f.name) or f.category }}</p>
+    <h1 class="stage-name" id="stage-name" data-f="name">{{ f.name }}</h1>
+    <p class="stage-meta">
+      <span class="stage-price" data-f="price">{{ f.price|money }}</span>
+      <span class="stage-stock" data-f="stock">{{ stock_text(f) }}</span>
+    </p>
+    <div class="stage-actions">
+      <form method="post" action="{{ url_for('cart.add') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="product_id" value="{{ f.id }}" data-f="id">
+        <input type="hidden" name="quantity" value="1">
+        <input type="hidden" name="next" value="{{ request.full_path }}">
+        <button class="btn btn-brand btn-lg">{{ icon("add_shopping_cart", "ms-sm") }} Add to cart</button>
+      </form>
+      <a class="btn btn-line btn-lg" href="{{ url_for('catalog.product_detail', product_id=f.id) }}" data-f="href">See details</a>
+    </div>
+  </div>
+  <div class="stage-shoe">
+    <img src="{{ f.image_src() }}" alt="" width="864" height="864" data-f="img">
+  </div>
+  {% if featured|length > 1 %}
+  <div class="stage-picks" role="group" aria-label="Choose a featured pair">
+    {% for p in featured %}
+    <button type="button" class="pick" aria-pressed="{{ 'true' if loop.first else 'false' }}"
+            data-id="{{ p.id }}" data-name="{{ p.name }}" data-brand="{{ brand_of(p.name) or p.category }}"
+            data-price="{{ p.price|money }}" data-stock="{{ stock_text(p) }}" data-img="{{ p.image_src() }}"
+            data-href="{{ url_for('catalog.product_detail', product_id=p.id) }}">
+      <img src="{{ p.image_src() }}" alt="" loading="lazy" width="64" height="64">
+      <span class="visually-hidden">Show {{ p.name }}</span>
+    </button>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+
+<section class="home-block" aria-labelledby="cats-title">
+  <h2 class="home-h" id="cats-title">Shop by category</h2>
+  <div class="cat-tiles">
+    {% for c, n in categories.items() %}
+    <a class="cat-tile" href="{{ shop_url(category=c) }}">
+      {% if tiles.get(c) %}<img src="{{ tiles[c].image_src() }}" alt="" loading="lazy" width="864" height="864">{% endif %}
+      <span class="cat-name">{{ c }}</span>
+      <span class="cat-count">{{ n }} pair{{ '' if n == 1 else 's' }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+{% endif %}
+
+{% set presets = [("$100 to $150", 100, 150), ("Over $150", 150, none)] %}
+<section id="products" class="catalog" aria-labelledby="results-title">
+  <div class="catalog-head">
+    <div>
+      <h2 id="results-title">
+        {%- if q %}Results for “{{ q }}”
+        {%- elif brand %}{{ brand }}
+        {%- elif category %}{{ category }}
+        {%- elif filtered %}Filtered results
+        {%- else %}All sneakers{% endif -%}
+      </h2>
+      <p class="catalog-count">{{ products|length }} pair{{ '' if products|length == 1 else 's' }}{% if filtered %} · <a href="{{ url_for('catalog.index') }}#products">Clear filters</a>{% endif %}</p>
+    </div>
+    <form class="sort-form" method="get" action="{{ url_for('catalog.index') }}#products">
+      {% for k in ("q", "category", "brand", "in_stock", "min", "max") %}{% if request.args.get(k) %}<input type="hidden" name="{{ k }}" value="{{ request.args.get(k) }}">{% endif %}{% endfor %}
+      <label for="sort">Sort</label>
+      <select class="form-select form-select-sm" id="sort" name="sort" data-autosubmit>
+        {% for key, (label, _) in sorts.items() %}<option value="{{ key }}" {% if key == sort %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+      <noscript><button class="btn btn-line btn-sm">Sort</button></noscript>
+    </form>
+  </div>
+
+  <nav class="toolbar" aria-label="Filter sneakers">
+    <a class="fchip {{ 'on' if not category }}" href="{{ shop_url(category=none) }}" {% if not category %}aria-current="true"{% endif %}>All <span class="n">{{ total_active }}</span></a>
+    {% for c, n in categories.items() %}
+    <a class="fchip {{ 'on' if c == category }}" href="{{ shop_url(category=c) }}" {% if c == category %}aria-current="true"{% endif %}>{{ c }} <span class="n">{{ n }}</span></a>
+    {% endfor %}
+    <span class="sep" aria-hidden="true"></span>
+    {% for label, lo, hi in presets %}
+    {% set on = min_price == lo and max_price == hi %}
+    <a class="fchip {{ 'on' if on }}" href="{{ shop_url(min=none, max=none) if on else shop_url(min=lo, max=hi) }}" {% if on %}aria-current="true"{% endif %}>{{ label }}</a>
+    {% endfor %}
+    <span class="sep" aria-hidden="true"></span>
+    <a class="fchip {{ 'on' if in_stock_only }}" href="{{ shop_url(in_stock=none if in_stock_only else 1) }}" {% if in_stock_only %}aria-current="true"{% endif %}>{{ icon("check" if in_stock_only else "inventory_2", "ms-sm") }} In stock only</a>
+    {% if brand %}
+    <span class="sep" aria-hidden="true"></span>
+    <a class="fchip on" href="{{ shop_url(brand=none) }}" aria-label="Remove brand filter {{ brand }}">{{ brand }} {{ icon("close", "ms-sm") }}</a>
+    {% endif %}
+  </nav>
+
+  {% if products %}
+  <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-3">
+    {% for p in products %}{% set reveal_index = loop.index0 % 8 %}{% include "front/page/home/_product_card.html" %}{% endfor %}
+  </div>
+  {% else %}
+  <div class="empty card-x">
+    {{ icon("search_off") }}
+    <h2>No sneakers match</h2>
+    <p>Try another category, brand or price.</p>
+    <a href="{{ url_for('catalog.index') }}#products" class="btn btn-brand">Clear filters</a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

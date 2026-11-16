@@ -1,0 +1,19 @@
+{% extends "admin/layout/base.html" %}
+{% block title %}Admin login · {{ shop_name }}{% endblock %}
+{% block content %}
+<form method="post" class="card-x login-card rise">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <h1 class="h4 fw-bold text-center mb-1">Sneakers Shop admin</h1>
+  <p class="text-muted text-center small mb-4">Sign in to manage products and orders.</p>
+  <div class="mb-3">
+    <label class="form-label" for="username">Username</label>
+    <input class="form-control" id="username" name="username" autocomplete="username" required autofocus maxlength="100">
+  </div>
+  <div class="mb-4">
+    <label class="form-label" for="password">Password</label>
+    <input class="form-control" id="password" name="password" type="password" autocomplete="current-password" required maxlength="200">
+  </div>
+  <button class="btn btn-brand btn-lg w-100">{{ icon("login", "ms-sm") }} Sign in</button>
+  <a class="btn btn-link w-100 mt-2" href="{{ url_for('catalog.index') }}">{{ icon("arrow_back", "ms-sm") }} Back to the store</a>
+</form>
+{% endblock %}

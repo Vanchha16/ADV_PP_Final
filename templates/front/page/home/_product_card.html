@@ -1,0 +1,27 @@
+{% set detail_url = url_for('catalog.product_detail', product_id=p.id) %}
+<div class="col" data-reveal data-reveal-index="{{ reveal_index or 0 }}">
+  <article class="pcard {{ 'is-soldout' if not p.in_stock }}">
+    <a class="pcard-photo" href="{{ detail_url }}" tabindex="-1" aria-hidden="true">
+      <img src="{{ p.image_src() }}" alt="" loading="lazy" width="864" height="864">
+    </a>
+    <div class="pcard-body">
+      <h3 class="pcard-name"><a href="{{ detail_url }}">{{ p.name }}</a></h3>
+      <p class="pcard-desc">{{ p.short_description }}</p>
+      <div class="pcard-price">
+        <span class="price">{{ p.price|money }}</span>
+        {% if not p.in_stock %}<span class="pcard-flag">Sold out</span>
+        {% elif p.stock <= 3 %}<span class="pcard-flag low">Only {{ p.stock }} left</span>{% endif %}
+      </div>
+      <div class="pcard-actions">
+        <a href="{{ detail_url }}" class="btn btn-line btn-sm" aria-label="View details of {{ p.name }}">View details</a>
+        <form method="post" action="{{ url_for('cart.add') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="product_id" value="{{ p.id }}">
+          <input type="hidden" name="quantity" value="1">
+          <input type="hidden" name="next" value="{{ request.full_path }}">
+          <button class="btn btn-brand btn-sm add-btn" {% if not p.in_stock %}disabled{% endif %} aria-label="Add {{ p.name }} to cart">{{ icon("add_shopping_cart", "ms-sm") }}<span>Add to cart</span></button>
+        </form>
+      </div>
+    </div>
+  </article>
+</div>

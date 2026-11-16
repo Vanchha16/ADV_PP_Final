@@ -1,0 +1,139 @@
+{% from "front/layout/_macros.html" import flashes, head_assets with context %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ shop_name }}{% endblock %}</title>
+  {% block meta %}<meta name="description" content="{{ shop_name }}: authentic Jordan, Nike, adidas, New Balance and ASICS sneakers delivered across Cambodia, paid with KHQR.">{% endblock %}
+  {{ head_assets() }}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+<a class="skip-link" href="#main">Skip to content</a>
+{% block layout %}
+{% set on_index = request.endpoint == 'catalog.index' %}
+{% set cur_cat = request.args.get('category') if on_index else None %}
+{% set nav_links = [
+  ("Home", "home", url_for('catalog.index'), on_index and not filtered),
+  ("Basketball", "sports_basketball", url_for('catalog.index', category='Basketball'), cur_cat == 'Basketball'),
+  ("Lifestyle", "steps", url_for('catalog.index', category='Lifestyle'), cur_cat == 'Lifestyle'),
+  ("Running", "directions_run", url_for('catalog.index', category='Running'), cur_cat == 'Running'),
+] %}
+<header class="topbar" data-elevate>
+  <div class="container">
+    <div class="navrow">
+      <button type="button" class="round-btn d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#site-menu" aria-controls="site-menu" aria-label="Open menu">{{ icon("menu") }}</button>
+      <a class="brand" href="{{ url_for('catalog.index') }}">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="" width="40" height="40">
+        <strong>Sneakers Shop</strong>
+      </a>
+      <nav class="mainnav" aria-label="Shop sections">
+        {% for label, ico, href, active in nav_links %}
+        <a href="{{ href }}" class="{{ 'active' if active }}" {% if active %}aria-current="page"{% endif %}>{{ label }}</a>
+        {% endfor %}
+      </nav>
+      <div class="bar-actions">
+        <button type="button" class="round-btn" data-search-toggle aria-controls="site-search" aria-expanded="{{ 'true' if q else 'false' }}" aria-label="Search" title="Search">
+          <span class="ms" data-search-icon aria-hidden="true">{{ 'close' if q else 'search' }}</span>
+        </button>
+        <button type="button" class="round-btn" data-theme-toggle aria-label="Switch light or dark theme" title="Light or dark theme">
+          <span class="ms" data-theme-icon aria-hidden="true">dark_mode</span>
+        </button>
+        <a class="round-btn" href="{{ url_for('cart.view') }}" aria-label="Cart, {{ cart_count }} items" title="Cart">
+          {{ icon("shopping_bag") }}
+          {% if cart_count %}<span class="count-badge">{{ cart_count }}</span>{% endif %}
+        </a>
+      </div>
+    </div>
+    <div class="search-panel" id="site-search" {% if not q %}hidden{% endif %}>
+      <form class="search-pill" action="{{ url_for('catalog.index') }}" role="search">
+        {{ icon("search") }}
+        <input type="search" name="q" value="{{ q or '' }}" placeholder="Search Jordan, Dunk, Samba…" aria-label="Search products" maxlength="100">
+        <button aria-label="Search">{{ icon("arrow_forward") }}</button>
+      </form>
+    </div>
+  </div>
+</header>
+
+<div class="offcanvas offcanvas-start site-menu" tabindex="-1" id="site-menu" aria-labelledby="site-menu-title">
+  <div class="offcanvas-header">
+    <a class="brand" href="{{ url_for('catalog.index') }}">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="" width="40" height="40">
+      <strong id="site-menu-title">Sneakers Shop</strong>
+    </a>
+    <button type="button" class="round-btn" data-bs-dismiss="offcanvas" aria-label="Close menu">{{ icon("close") }}</button>
+  </div>
+  <div class="offcanvas-body">
+    <nav class="menu-list" aria-label="Shop sections">
+      {% for label, ico, href, active in nav_links %}
+      <a href="{{ href }}" class="{{ 'active' if active }}" {% if active %}aria-current="page"{% endif %}>
+        <span class="mi">{{ icon(ico) }}</span>{{ label }}{{ icon("chevron_right", "ms-sm chev") }}
+      </a>
+      {% endfor %}
+    </nav>
+    <a class="menu-cart" href="{{ url_for('cart.view') }}">{{ icon("shopping_bag") }} Your cart<span>{{ cart_count }} item{{ '' if cart_count == 1 else 's' }}</span></a>
+    <div class="menu-theme">
+      <span>Dark mode</span>
+      <button type="button" class="round-btn" data-theme-toggle aria-label="Switch light or dark theme" title="Light or dark theme">
+        <span class="ms" data-theme-icon aria-hidden="true">dark_mode</span>
+      </button>
+    </div>
+    <ul class="menu-perks">
+      <li>{{ icon("local_shipping", "ms-sm") }} Free delivery in Cambodia</li>
+      <li>{{ icon("qr_code_2", "ms-sm") }} Pay with KHQR from any banking app</li>
+      <li>{{ icon("verified", "ms-sm") }} 100% authentic sneakers</li>
+    </ul>
+  </div>
+</div>
+
+<main id="main" class="{% block main_class %}pb-4{% endblock %} page-enter">
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a class="brand" href="{{ url_for('catalog.index') }}">
+          <img src="{{ url_for('static', filename='img/logo.png') }}" alt="" width="40" height="40">
+          <span><strong>Sneakers Shop</strong></span>
+        </a>
+        <p class="mt-2 mb-0" style="max-width: 34ch">Authentic sneakers from Jordan, Nike, adidas, New Balance and more, delivered across Cambodia.</p>
+      </div>
+      <div>
+        <h2>Shop</h2>
+        <ul>
+          <li><a href="{{ url_for('catalog.index') }}">All products</a></li>
+          {% for c in nav_categories %}<li><a href="{{ url_for('catalog.index', category=c) }}#products">{{ c }}</a></li>{% endfor %}
+        </ul>
+      </div>
+      <div>
+        <h2>Your order</h2>
+        <ul>
+          <li><a href="{{ url_for('cart.view') }}">Cart</a></li>
+          <li><a href="{{ url_for('checkout.index') }}">Checkout</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>We accept</h2>
+        <div class="pay-logos">
+          <img src="{{ url_for('static', filename='img/pay-bakong.png') }}" alt="Bakong">
+          <span><span class="khqr-pill">KHQR</span> by Bakong<br>ABA, ACLEDA, Wing and every banking app</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© {{ current_year }} {{ shop_name }}</span>
+      <span>Phnom Penh, Cambodia</span>
+    </div>
+  </div>
+</footer>
+{% endblock %}
+{{ flashes() }}
+<script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/motion.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

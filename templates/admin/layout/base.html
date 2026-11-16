@@ -1,0 +1,55 @@
+{% extends "front/layout/base.html" %}
+{% block body_class %}admin{% endblock %}
+{% block layout %}
+{% if session.is_admin %}
+{% set ep = request.endpoint or "" %}
+{% set nav = [
+  ("admin.dashboard", "space_dashboard", "Dashboard", ep == "admin.dashboard", 0),
+  ("admin.orders", "receipt_long", "Orders", ep.startswith("admin.order"), sidebar_pending),
+  ("admin.products", "inventory_2", "Products", ep in ("admin.products", "admin.product_edit", "admin.product_new"), 0),
+] %}
+<div class="admin-shell">
+  <aside class="side" id="admin-sidebar" aria-label="Admin menu">
+    <a class="side-brand" href="{{ url_for('admin.dashboard') }}">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="">
+      <span><strong>Sneakers Shop</strong><small>Shop admin</small></span>
+    </a>
+    <nav class="side-nav">
+      {% for endpoint, ico, label, active, badge in nav %}
+      <a class="side-link {% if active %}active{% endif %}" href="{{ url_for(endpoint) }}" {% if active %}aria-current="page"{% endif %}>
+        {{ icon(ico) }}<span class="lbl">{{ label }}</span>
+        {% if badge %}<span class="side-badge" title="Awaiting payment">{{ badge }}</span>{% endif %}
+      </a>
+      {% endfor %}
+      <a class="side-link" href="{{ url_for('catalog.index') }}" target="_blank" rel="noopener">{{ icon("storefront") }}<span class="lbl">View store</span>{{ icon("open_in_new", "ms-sm") }}</a>
+    </nav>
+    <form method="post" action="{{ url_for('admin.logout') }}" class="user-card">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <span class="avatar">{{ config.ADMIN_USERNAME[:1]|upper }}</span>
+      <span class="who"><strong>{{ config.ADMIN_USERNAME }}</strong><small>Administrator</small></span>
+      <button class="logout-btn" title="Log out" aria-label="Log out">{{ icon("logout") }}</button>
+    </form>
+  </aside>
+  <div class="side-backdrop" data-sidebar-close></div>
+
+  <div class="admin-main">
+    <div class="admin-top">
+      <button class="round-btn" type="button" data-sidebar-toggle aria-controls="admin-sidebar" aria-label="Open menu">{{ icon("menu") }}</button>
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="">
+      <strong>{% block section %}Admin{% endblock %}</strong>
+    </div>
+    <main id="main" class="admin-content page-enter">
+      {% block content %}{% endblock %}
+    </main>
+    <footer class="admin-footer">
+      <span>© {{ current_year }} {{ shop_name }} admin</span>
+      <span>Payments: {% if config.PAYMENT_DEMO_MODE %}KHQR demo mode{% else %}Bakong live{% endif %}</span>
+    </footer>
+  </div>
+</div>
+{% else %}
+<main id="main" class="admin-login page-enter">
+  {{ self.content() }}
+</main>
+{% endif %}
+{% endblock %}

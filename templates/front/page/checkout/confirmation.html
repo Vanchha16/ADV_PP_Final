@@ -1,0 +1,43 @@
+{% extends "front/layout/base.html" %}
+{% block title %}Order confirmed · {{ shop_name }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="receipt text-center rise" style="padding: 28px">
+      <span class="stamp">PAID</span>
+      <div class="success-ring">{{ icon("check_circle") }}</div>
+      <h1 class="h3 fw-bold mb-1">Thank you, your order is confirmed!</h1>
+      <p class="text-muted">We received your KHQR payment. We'll call {{ order.phone }} before delivery.</p>
+      <div class="order-meta text-start mt-3">
+        <div><small>Order ID</small><strong>{{ order.number }}</strong></div>
+        <div><small>Date</small><strong>{{ order.paid_at|dt }}</strong></div>
+        <div><small>Total Amount</small><strong>{{ order.total_amount|money(order.currency) }}</strong></div>
+        <div><small>Payment</small><strong>Paid with KHQR</strong></div>
+      </div>
+    </div>
+    <div class="row g-4 mt-1">
+      <div class="col-md-6 rise" style="--d: 80ms">
+        <div class="card-x card-pad h-100">
+          <h2 class="sec-title">{{ icon("person") }} Customer details</h2>
+          <dl class="detail-list mb-0">
+            <dt>Name</dt><dd>{{ order.customer_name }}</dd>
+            <dt>Email</dt><dd>{{ order.email }}</dd>
+            <dt>Phone</dt><dd>{{ order.phone }}</dd>
+            <dt>Shipping to</dt><dd class="pre-line">{{ order.shipping_address }}</dd>
+          </dl>
+        </div>
+      </div>
+      <div class="col-md-6 rise" style="--d: 140ms">
+        {% set items = [] %}
+        {% for i in order.items %}{% set _ = items.append({"name": i.product_name, "quantity": i.quantity, "subtotal": i.subtotal, "image": i.product.image_src() if i.product else None}) %}{% endfor %}
+        {% set total = order.total_amount %}{% set summary_title = "Items" %}
+        {% include "front/page/checkout/_summary.html" %}
+      </div>
+    </div>
+    <div class="text-center mt-4 d-flex gap-2 justify-content-center flex-wrap">
+      <button class="btn btn-line" onclick="window.print()">{{ icon("print", "ms-sm") }} Print receipt</button>
+      <a href="{{ url_for('catalog.index') }}" class="btn btn-brand">{{ icon("storefront", "ms-sm") }} Continue shopping</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

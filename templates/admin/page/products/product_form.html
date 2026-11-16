@@ -1,0 +1,106 @@
+{% extends "admin/layout/base.html" %}
+{% block title %}{{ "Edit" if product else "New" }} product · Admin{% endblock %}
+{% block section %}{{ 'Edit product' if product else 'Add product' }}{% endblock %}
+{% block content %}
+<div class="page-head rise">
+  <a href="{{ url_for('admin.products') }}" class="round-btn" aria-label="Back to products">{{ icon("arrow_back") }}</a>
+  <div class="titles">
+    <h1>{{ "Edit product #" ~ product.id if product else "Add new product" }}</h1>
+    <div class="sub">{{ "Changes show in the shop as soon as you save." if product else "Fill in the details. Inactive products stay hidden from the shop." }}</div>
+  </div>
+</div>
+<form method="post" enctype="multipart/form-data" class="row g-3" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="col-lg-8">
+    <section class="card-x card-pad" data-reveal>
+      <h2 class="sec-title">{{ icon("edit_note") }} Details</h2>
+      <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input id="name" name="name" class="form-control {% if errors.name %}is-invalid{% endif %}" value="{{ data.name or '' }}" required maxlength="120">
+        <div class="invalid-feedback">{{ errors.name }}</div>
+      </div>
+      <div class="mb-3">
+        <label for="category" class="form-label">Category</label>
+        <input id="category" name="category" class="form-control" value="{{ data.category or '' }}" maxlength="40" list="category-list" placeholder="e.g. Basketball, Lifestyle, Running">
+        <datalist id="category-list">{% for c in categories %}<option value="{{ c }}">{% endfor %}</datalist>
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea id="description" name="description" rows="6" class="form-control" style="min-height:120px">{{ data.description or '' }}</textarea>
+      </div>
+      <div class="row">
+        <div class="col-sm-6 mb-3">
+          <label for="price" class="form-label">Price (USD)</label>
+          <input id="price" name="price" type="number" step="0.01" min="0.01" class="form-control {% if errors.price %}is-invalid{% endif %}" value="{{ data.price or '' }}" required>
+          <div class="invalid-feedback">{{ errors.price }}</div>
+        </div>
+        <div class="col-sm-6 mb-3">
+          <label for="stock" class="form-label">Stock Quantity</label>
+          <input id="stock" name="stock" type="number" step="1" min="0" class="form-control {% if errors.stock %}is-invalid{% endif %}" value="{{ data.stock if data.stock is not none else '' }}" required>
+          <div class="invalid-feedback">{{ errors.stock }}</div>
+        </div>
+      </div>
+      <span class="form-label">Status</span>
+      <div class="seg" role="radiogroup" aria-label="Status">
+        <input type="radio" name="status" id="st-active" value="active" {% if data.is_active %}checked{% endif %}><label for="st-active">Active</label>
+        <input type="radio" name="status" id="st-inactive" value="inactive" {% if not data.is_active %}checked{% endif %}><label for="st-inactive">Inactive</label>
+      </div>
+      <div class="form-text">Inactive products are hidden from the store.</div>
+    </section>
+  </div>
+  <div class="col-lg-4">
+    <section class="card-x card-pad" data-reveal data-reveal-index="1">
+      <h2 class="sec-title">{{ icon("image") }} Image</h2>
+      <div class="image-preview mb-3"><img id="preview" src="{{ product.image_src() if product else url_for('static', filename='img/placeholder.svg') }}" alt="Preview"></div>
+      <input id="image" name="image" type="file" accept="image/png,image/jpeg,image/webp,image/gif" class="form-control {% if errors.image %}is-invalid{% endif %}">
+      <div class="invalid-feedback">{{ errors.image }}</div>
+      <div class="form-text mb-3">PNG, JPG, WEBP or GIF, up to 5 MB.</div>
+      {% if product and product.image_data %}
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" name="remove_image" id="remove_image" value="1">
+        <label class="form-check-label" for="remove_image">Remove uploaded image</label>
+      </div>
+      {% endif %}
+      <label for="image_url" class="form-label">Or use an image URL</label>
+      <input id="image_url" name="image_url" type="url" class="form-control {% if errors.image_url %}is-invalid{% endif %}" value="{{ data.image_url or '' }}" placeholder="https://…">
+      <div class="invalid-feedback">{{ errors.image_url }}</div>
+    </section>
+    <button class="btn btn-brand btn-lg w-100 mt-3">{{ icon("check", "ms-sm") }} {{ "Update product" if product else "Save product" }}</button>
+  </div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('image').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (f) document.getElementById('preview').src = URL.createObjectURL(f);
+});
+
+(() => {
+  const form = document.querySelector('form[enctype]');
+  const key = 'aws_draft:' + location.pathname;
+  const fields = () => Array.from(form.elements).filter(el => el.name && el.name !== 'csrf_token' && el.type !== 'file' && el.type !== 'hidden');
+  const read = () => { try { return JSON.parse(sessionStorage.getItem(key) || 'null'); } catch { return null; } };
+  const save = () => {
+    const draft = {};
+    fields().forEach(el => {
+      if (el.type === 'radio') { if (el.checked) draft[el.name] = el.value; }
+      else draft[el.name] = el.type === 'checkbox' ? el.checked : el.value;
+    });
+    try { sessionStorage.setItem(key, JSON.stringify(draft)); } catch { }
+  };
+  const draft = read();
+  if (draft && !form.querySelector('.is-invalid')) {
+    fields().forEach(el => {
+      if (!(el.name in draft)) return;
+      if (el.type === 'radio') el.checked = el.value === draft[el.name];
+      else if (el.type === 'checkbox') el.checked = !!draft[el.name];
+      else el.value = draft[el.name];
+    });
+  }
+  form.addEventListener('input', save);
+  form.addEventListener('change', save);
+  form.addEventListener('submit', () => { try { sessionStorage.removeItem(key); } catch { } });
+})();
+</script>
+{% endblock %}

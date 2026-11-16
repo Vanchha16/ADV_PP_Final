@@ -1,0 +1,178 @@
+(() => {
+  const root = document.documentElement;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $$ = (sel, el = document) => Array.from(el.querySelectorAll(sel));
+
+  const KEY = 'aws_theme';
+  const sysDark = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const getMode = () => { try { return localStorage.getItem(KEY) || 'system'; } catch { return 'system'; } };
+  const applyTheme = (mode) => {
+    const dark = mode === 'dark' || (mode === 'system' && sysDark());
+    root.classList.toggle('dark', dark);
+    root.setAttribute('data-theme-mode', mode);
+    $$('[data-theme-switch] [data-mode]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.mode === mode)));
+    $$('[data-theme-icon]').forEach(i => { i.textContent = dark ? 'light_mode' : 'dark_mode'; });
+  };
+  const setMode = (mode) => {
+    root.classList.add('theme-fade');
+    setTimeout(() => root.classList.remove('theme-fade'), 300);
+    try { localStorage.setItem(KEY, mode); } catch { }
+    applyTheme(mode);
+  };
+  applyTheme(getMode());
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => getMode() === 'system' && applyTheme('system'));
+  $$('[data-theme-switch] [data-mode]').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  $$('[data-theme-toggle]').forEach(b => b.addEventListener('click', () => setMode(root.classList.contains('dark') ? 'light' : 'dark')));
+
+  const revealEls = $$('[data-reveal]');
+  if (reduce || !('IntersectionObserver' in window)) {
+    revealEls.forEach(el => el.classList.add('is-visible'));
+  } else {
+    const io = new IntersectionObserver(entries => entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('is-visible');
+      io.unobserve(e.target);
+    }), { rootMargin: '0px 0px -6% 0px', threshold: 0.06 });
+    revealEls.forEach(el => {
+      el.style.transitionDelay = `${Math.min(parseInt(el.dataset.revealIndex || '0', 10), 8) * 60}ms`;
+      io.observe(el);
+    });
+  }
+
+  const fmt = (n, d, p) => p + n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+  $$('[data-count]').forEach(el => {
+    const target = parseFloat(el.dataset.count) || 0;
+    const d = parseInt(el.dataset.decimals || '0', 10);
+    const p = el.dataset.prefix || '';
+    if (reduce || !target) { el.textContent = fmt(target, d, p); return; }
+    const start = performance.now();
+    const step = now => {
+      const t = Math.min(1, (now - start) / 900);
+      el.textContent = fmt(target * (1 - Math.pow(1 - t, 3)), d, p);
+      if (t < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
+
+  $$('[data-elevate]').forEach(bar => {
+    const update = () => bar.classList.toggle('is-scrolled', window.scrollY > 8);
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+  });
+
+  $$('[data-stage]').forEach(stage => {
+    const field = (name) => stage.querySelector(`[data-f="${name}"]`);
+    const img = field('img');
+    const copy = stage.querySelector('.stage-copy');
+    const picks = $$('.pick', stage);
+    picks.forEach(pick => pick.addEventListener('click', () => {
+      if (pick.getAttribute('aria-pressed') === 'true') return;
+      const d = pick.dataset;
+      picks.forEach(p => p.setAttribute('aria-pressed', String(p === pick)));
+      field('brand').textContent = d.brand;
+      field('name').textContent = d.name;
+      field('price').textContent = d.price;
+      field('stock').textContent = d.stock;
+      field('id').value = d.id;
+      field('href').href = d.href;
+      img.src = d.img;
+      if (!reduce) {
+        [img, copy].forEach(el => { el.classList.remove('is-in'); void el.offsetWidth; el.classList.add('is-in'); });
+      }
+    }));
+  });
+
+  $$('.stepper').forEach(st => {
+    const input = st.querySelector('input');
+    $$('[data-step]', st).forEach(btn => btn.addEventListener('click', () => {
+      if (input.disabled) return;
+      const min = parseInt(input.min || '0', 10), max = parseInt(input.max || '999', 10);
+      const v = Math.min(Math.max((parseInt(input.value, 10) || 0) + parseInt(btn.dataset.step, 10), min), max);
+      input.value = v;
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    }));
+  });
+  let cartTimer = null;
+  $$('[data-autosubmit-delay]').forEach(input => input.addEventListener('change', () => {
+    clearTimeout(cartTimer);
+    cartTimer = setTimeout(() => input.form.requestSubmit(), 700);
+  }));
+
+  $$('[data-autosubmit]').forEach(el => el.addEventListener('change', () => el.form && el.form.requestSubmit()));
+
+  $$('form[action$="/cart/add"]').forEach(form => form.addEventListener('submit', () => {
+    const btn = form.querySelector('button:not([type="button"])');
+    if (!btn) return;
+    btn.classList.add('is-busy');
+    const ico = btn.querySelector('.ms');
+    if (ico && btn.classList.contains('add-btn')) ico.textContent = 'check';
+  }));
+
+  $$('[data-copy]').forEach(btn => btn.addEventListener('click', async () => {
+    const label = btn.querySelector('span:not(.ms)') || btn;
+    try { await navigator.clipboard.writeText(btn.dataset.copy); label.textContent = 'Link copied'; }
+    catch { label.textContent = 'Copy failed'; }
+    setTimeout(() => { label.textContent = 'Copy link'; }, 2000);
+  }));
+
+  $$('[data-toast]').forEach((t, k) => setTimeout(() => {
+    t.classList.add('leaving');
+    t.addEventListener('animationend', () => t.remove(), { once: true });
+    if (reduce) t.remove();
+  }, 4200 + k * 400));
+
+  const confirmBox = (message, okLabel) => new Promise(resolve => {
+    const back = document.createElement('div');
+    back.className = 'dialog-back';
+    back.innerHTML = `<div class="dialog-card" role="alertdialog" aria-modal="true" aria-labelledby="dlg-t" aria-describedby="dlg-m">
+        <div class="icon"><span class="ms ms-lg" aria-hidden="true">warning</span></div>
+        <h3 id="dlg-t">Are you sure?</h3><p id="dlg-m"></p>
+        <div class="d-flex gap-2 mt-3"><button type="button" class="btn btn-line flex-fill" data-no>Keep it</button>
+        <button type="button" class="btn btn-red flex-fill" data-yes></button></div></div>`;
+    back.querySelector('#dlg-m').textContent = message;
+    back.querySelector('[data-yes]').textContent = okLabel || 'Confirm';
+    const done = (v) => { back.remove(); document.removeEventListener('keydown', onKey); resolve(v); };
+    const onKey = (e) => { if (e.key === 'Escape') done(false); };
+    back.addEventListener('click', e => { if (e.target === back) done(false); });
+    back.querySelector('[data-no]').addEventListener('click', () => done(false));
+    back.querySelector('[data-yes]').addEventListener('click', () => done(true));
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(back);
+    back.querySelector('[data-no]').focus();
+  });
+  document.addEventListener('submit', async e => {
+    const form = e.target;
+    const trigger = e.submitter && e.submitter.dataset.confirm ? e.submitter : form;
+    const msg = trigger.dataset.confirm;
+    if (!msg || form.dataset.confirmed) return;
+    e.preventDefault();
+    if (await confirmBox(msg, trigger.dataset.confirmOk)) {
+      form.dataset.confirmed = '1';
+      form.requestSubmit(e.submitter || undefined);
+    }
+  });
+
+  const searchBtn = document.querySelector('[data-search-toggle]');
+  const searchPanel = searchBtn && document.getElementById(searchBtn.getAttribute('aria-controls'));
+  if (searchPanel) {
+    const searchIcon = searchBtn.querySelector('[data-search-icon]');
+    const setSearch = (open) => {
+      searchPanel.hidden = !open;
+      searchBtn.setAttribute('aria-expanded', String(open));
+      searchIcon.textContent = open ? 'close' : 'search';
+      if (open) searchPanel.querySelector('input')?.focus();
+    };
+    searchBtn.addEventListener('click', () => setSearch(searchPanel.hidden));
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !searchPanel.hidden) { setSearch(false); searchBtn.focus(); }
+      if (e.key === '/' && searchPanel.hidden && !/input|textarea|select/i.test(document.activeElement?.tagName || '')) {
+        e.preventDefault(); setSearch(true);
+      }
+    });
+  }
+
+  const closeSidebar = () => document.body.classList.remove('sidebar-open');
+  $$('[data-sidebar-toggle]').forEach(b => b.addEventListener('click', () => document.body.classList.toggle('sidebar-open')));
+  $$('[data-sidebar-close]').forEach(el => el.addEventListener('click', closeSidebar));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+})();
