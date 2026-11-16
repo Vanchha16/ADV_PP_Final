@@ -123,7 +123,7 @@ def mark_paid(order, data=None):
 
 
 def refresh_status(order):
-    if order.status != Order.STATUS_PENDING or not order.khqr_md5 or demo_mode():
+    if order.status != Order.STATUS_PENDING or not order.khqr_md5:
         return order.status
     status, data = check_transaction(order.khqr_md5)
     if status == PAID:
