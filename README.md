@@ -35,7 +35,6 @@ Screenshots: [product](docs/screenshots/product.png) · [cart](docs/screenshots/
 - **bakong-khqr** to build the EMVCo KHQR string, **qrcode** to render it, **Bakong Open API** (`check_transaction_by_md5`) to confirm payment
 - **Pillow** to validate and resize uploaded images (stored in the DB so they survive redeploys)
 - **UI:** same design as our MA project (mobile app + web admin): sky-blue brand, Roboto, Material Symbols Rounded icons, light / dark / system theme, the Sneakers Shop logo, Archivo condensed for big sneaker names. Bootstrap 5 grid (bundled in `static/vendor`).
-- **pytest** test suite (26 tests)
 
 ## Project structure
 ```
@@ -74,9 +73,6 @@ ADV_PP_Final/
 │       ├── img/                 # logo.png, logo-full.webp, favicon.png, pay-bakong.png,
 │       │                        #   placeholder.svg
 │       └── vendor/bootstrap/    # Bootstrap 5 (served locally, no CDN)
-├── tests/
-│   ├── conftest.py              # app + client fixtures (temporary SQLite, demo payments)
-│   └── test_shop.py             # 26 tests: store, filters, cart, checkout, KHQR, admin, importer, header
 ├── bakong_proxy/proxy.py        # optional relay for servers outside Cambodia
 └── docs/screenshots/            # images used in this README
 ```
@@ -101,13 +97,9 @@ flask --app wsgi run --debug
 ```
 Open http://127.0.0.1:5000. Admin: http://127.0.0.1:5000/admin (default `admin` / `admin123`, **change it**).
 
-The first start creates the database and loads the 18 products in `data/products.json`, downloading their photos. To reset:
+The first start creates the database and loads the 19 products in `data/products.json`, downloading their photos. To reset:
 ```bash
 flask --app wsgi seed --reset
-```
-Run tests:
-```bash
-pip install pytest && python -m pytest -q
 ```
 
 ## Product catalogue and import script

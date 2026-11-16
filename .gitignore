@@ -8,3 +8,6 @@ instance/
 *.db
 .idea/
 pytest-cache-files-*/
+
+# Tests are kept locally only, not on GitHub
+tests/
