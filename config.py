@@ -46,7 +46,6 @@ class Config:
     BAKONG_PHONE = os.environ.get("BAKONG_PHONE", "").strip()
     KHQR_CURRENCY = os.environ.get("KHQR_CURRENCY", "USD").strip().upper()
     QR_TTL_MINUTES = int(os.environ.get("QR_TTL_MINUTES", "10"))
-    PAYMENT_DEMO_MODE = _bool("PAYMENT_DEMO_MODE", default=not BAKONG_TOKEN)
 
     AUTO_SEED = _bool("AUTO_SEED", default=True)
     SEED_DOWNLOAD_IMAGES = _bool("SEED_DOWNLOAD_IMAGES", default=True)

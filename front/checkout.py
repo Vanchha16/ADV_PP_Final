@@ -1,6 +1,6 @@
 import re
 
-from flask import (Blueprint, abort, current_app, flash, redirect, render_template,
+from flask import (Blueprint, current_app, flash, redirect, render_template,
                    request, session, url_for)
 
 from extensions import db
@@ -62,8 +62,7 @@ def pay(public_id):
     if order.is_paid:
         return redirect(url_for("checkout.confirmation", public_id=public_id))
     return render_template("front/page/checkout/pay.html", order=order,
-                           qr_image=payments.qr_data_uri(order.khqr_string),
-                           demo_mode=payments.demo_mode())
+                           qr_image=payments.qr_data_uri(order.khqr_string))
 
 
 @bp.post("/order/<public_id>/regenerate")
@@ -78,12 +77,10 @@ def regenerate_qr(public_id):
     return redirect(url_for("checkout.pay", public_id=public_id))
 
 
-@bp.post("/order/<public_id>/simulate-payment")
-def simulate_payment(public_id):
-    if not payments.demo_mode():
-        abort(404)
+@bp.post("/order/<public_id>/paid-done")
+def paid_done(public_id):
     order = order_or_404(public_id)
-    payments.mark_paid(order, {"hash": f"DEMO-{order.khqr_md5[:12]}", "fromAccountId": "demo@bakong"})
+    payments.mark_paid(order, {"hash": f"MANUAL-{order.khqr_md5[:12]}", "fromAccountId": "Payment done button"})
     return redirect(url_for("checkout.confirmation", public_id=public_id))
 
 

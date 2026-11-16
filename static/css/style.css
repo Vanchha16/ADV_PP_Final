@@ -374,7 +374,6 @@ html.dark .menu-list a.active { color: var(--brand); }
 .how-to li { counter-increment: h; display: flex; gap: 12px; align-items: flex-start; padding: 7px 0; font-size: 14px; }
 .how-to li::before { content: counter(h); width: 26px; height: 26px; border-radius: 50%; flex: none; display: grid; place-items: center;
   background: var(--brand-tint); color: var(--brand); font-weight: 700; font-size: 12.5px; }
-.demo-box { border: 2px dashed var(--line); border-radius: 16px; padding: 14px; font-size: 13.5px; background: var(--card); }
 
 .success-ring { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 14px; background: var(--green-bg); color: var(--success);
   animation: pop .6s cubic-bezier(.34, 1.56, .64, 1) both; }

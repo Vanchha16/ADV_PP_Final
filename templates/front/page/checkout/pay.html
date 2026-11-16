@@ -25,15 +25,10 @@
       <div id="pay-status" class="pay-status"><span class="spinner-grow spinner-grow-sm" aria-hidden="true"></span> Waiting for payment…</div>
       <div class="text-muted small mt-2" id="countdown-wrap">Code expires in <strong class="countdown" id="countdown">--:--</strong></div>
     </div>
-    {% if demo_mode %}
-    <div class="demo-box mt-4">
-      <strong>Demo mode.</strong> No Bakong token is set, so this shop can't confirm a real payment. Use the button below to finish the order.
-      <form method="post" action="{{ url_for('checkout.simulate_payment', public_id=order.public_id) }}" class="mt-2">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button class="btn btn-success btn-sm">{{ icon("bolt", "ms-sm") }} Simulate successful payment</button>
-      </form>
-    </div>
-    {% endif %}
+    <form method="post" action="{{ url_for('checkout.paid_done', public_id=order.public_id) }}" class="text-center mt-4">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-success">{{ icon("check_circle", "ms-sm") }} Payment done</button>
+    </form>
   </div>
   <div class="col-lg-5 rise" style="--d: 80ms">
     <div class="card-x card-pad mb-4">

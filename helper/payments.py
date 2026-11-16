@@ -22,10 +22,6 @@ class BakongAuthError(RuntimeError):
     pass
 
 
-def demo_mode():
-    return bool(current_app.config["PAYMENT_DEMO_MODE"])
-
-
 def assign_new_qr(order):
     cfg = current_app.config
     order.bill_number = f"ORD{order.id}T{int(utcnow().timestamp()) % 100000}"[:25]
