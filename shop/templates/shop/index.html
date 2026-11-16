@@ -57,16 +57,6 @@
   </div>
 </section>
 
-{% if brands %}
-<section class="home-block" aria-labelledby="brands-title">
-  <h2 class="home-h" id="brands-title">Shop by brand</h2>
-  <ul class="brand-list">
-    {% for b, n in brands %}
-    <li><a href="{{ shop_url(brand=b) }}">{{ b }} <span class="n">{{ n }} pair{{ '' if n == 1 else 's' }}</span></a></li>
-    {% endfor %}
-  </ul>
-</section>
-{% endif %}
 {% endif %}
 
 {% set presets = [("Under $100", none, 100), ("$100 to $150", 100, 150), ("Over $150", 150, none)] %}

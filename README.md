@@ -57,7 +57,7 @@ ADV_PP_Final/
 │   ├── importer.py              # `flask import-products` (JSON / CSV, photo download, pad crop)
 │   ├── seed.py                  # first-start catalogue + generated fallback images
 │   ├── views/
-│   │   ├── public.py            # store: home (featured pairs, brands, filters), product, cart, checkout, KHQR pay
+│   │   ├── public.py            # store: home (featured pairs, categories, filters), product, cart, checkout, KHQR pay
 │   │   └── admin.py             # admin: login, dashboard, products (CRUD, restock, hide), orders
 │   ├── templates/
 │   │   ├── base.html            # store layout: header + menu, footer, toasts

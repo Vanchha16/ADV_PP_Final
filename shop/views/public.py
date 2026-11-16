@@ -46,7 +46,7 @@ SORTS = {
 }
 
 
-# Brand -> how its product names start. Used for "Shop by brand" and the ?brand= filter.
+# Brand -> how its product names start. Used for the hero brand label and the ?brand= filter.
 BRANDS = [
     ("Jordan", "Air Jordan"), ("Nike", "Nike"), ("adidas", "adidas"), ("New Balance", "New Balance"),
     ("ASICS", "ASICS"), ("HOKA", "HOKA"), ("Salomon", "Salomon"), ("Converse", "Converse"),
@@ -142,19 +142,11 @@ def index():
     products = db.session.scalars(stmt.order_by(*SORTS[sort][1])).all()
 
     filtered = bool(q or category or brand or in_stock_only or min_price is not None or max_price is not None)
-    featured, tiles, brands = [], {}, []
-    if not filtered:
-        featured, tiles = _home_picks(products)
-        per_brand = {}
-        for p in products:
-            b = brand_of(p.name)
-            if b:
-                per_brand[b] = per_brand.get(b, 0) + 1
-        brands = [(b, per_brand[b]) for b, _ in BRANDS if b in per_brand]
+    featured, tiles = _home_picks(products) if not filtered else ([], {})
     return render_template("shop/index.html", products=products, q=q, category=category, brand=brand,
                            categories=counts, total_active=total_active, in_stock_only=in_stock_only,
                            min_price=min_price, max_price=max_price, sort=sort, sorts=SORTS,
-                           filtered=filtered, featured=featured, tiles=tiles, brands=brands,
+                           filtered=filtered, featured=featured, tiles=tiles,
                            brand_of=brand_of, shop_url=_shop_url)
 
 
